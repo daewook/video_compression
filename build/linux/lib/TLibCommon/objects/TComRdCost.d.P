@@ -1,0 +1,21 @@
+objects/TComRdCost.d.o: \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCost.cpp \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRom.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/CommonDef.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TypeDef.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCost.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComPattern.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComMv.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComSlice.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComList.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCostWeightPrediction.h
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCost.cpp :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRom.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/CommonDef.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TypeDef.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCost.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComPattern.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComMv.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComSlice.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComList.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/lib/TLibCommon/../../../../source/Lib/TLibCommon/TComRdCostWeightPrediction.h :

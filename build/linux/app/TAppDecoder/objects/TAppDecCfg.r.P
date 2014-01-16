@@ -1,0 +1,11 @@
+objects/TAppDecCfg.r.o: \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/App/TAppDecoder/TAppDecCfg.cpp \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/App/TAppDecoder/TAppDecCfg.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TLibCommon/CommonDef.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TLibCommon/TypeDef.h \
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TAppCommon/program_options_lite.h
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/App/TAppDecoder/TAppDecCfg.cpp :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/App/TAppDecoder/TAppDecCfg.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TLibCommon/CommonDef.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TLibCommon/TypeDef.h :
+ /afs/csail.mit.edu/u/d/daewookkim/urop/HM-12.0/build/linux/app/TAppDecoder/../../../../source/Lib/TAppCommon/program_options_lite.h :
