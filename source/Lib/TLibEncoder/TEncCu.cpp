@@ -264,7 +264,6 @@ Void TEncCu::encodeCU ( TComDataCU* pcCU )
   }
 
   // Encode CU data
-  printf("encode starts\n");
   xEncodeCU( pcCU, 0, 0 );
 }
 
@@ -1035,10 +1034,8 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   UInt uiRPelX   = uiLPelX + (g_uiMaxCUWidth>>uiDepth)  - 1;
   UInt uiTPelY   = pcCU->getCUPelY() + g_auiRasterToPelY[ g_auiZscanToRaster[uiAbsPartIdx] ];
   UInt uiBPelY   = uiTPelY + (g_uiMaxCUHeight>>uiDepth) - 1;
-  printf("here %u: %u %u %u %u\n", uiDepth, uiLPelX, uiRPelX, uiTPelY, uiBPelY);
   
   TComSlice * pcSlice = pcCU->getPic()->getSlice(pcCU->getPic()->getCurrSliceIdx());
-  printf("slide starts: %d\n", (int)pcSlice->getSliceSegmentCurStartCUAddr());
   // If slice start is within this cu...
   Bool bSliceStart = pcSlice->getSliceSegmentCurStartCUAddr() > pcPic->getPicSym()->getInverseCUOrderMap(pcCU->getAddr())*pcCU->getPic()->getNumPartInCU()+uiAbsPartIdx && 
     pcSlice->getSliceSegmentCurStartCUAddr() < pcPic->getPicSym()->getInverseCUOrderMap(pcCU->getAddr())*pcCU->getPic()->getNumPartInCU()+uiAbsPartIdx+( pcPic->getNumPartInCU() >> (uiDepth<<1) );
@@ -1064,7 +1061,7 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
     for (int i = 1; i < 4; i++) {
       ref[i] = ref[i - 1] + uiQNumParts;
     }
-    cilk_for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++) 
+    for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++) 
     {
       //uiAbsPartIdx+=uiQNumParts;
       int uiAbsPartIdx_ = ref[uiPartUnitIdx];
