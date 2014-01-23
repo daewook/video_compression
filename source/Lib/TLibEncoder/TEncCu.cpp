@@ -348,6 +348,49 @@ Void TEncCu::deriveTestModeAMP (TComDataCU *&rpcBestCU, PartSize eParentPartSize
 }
 #endif
 
+Void TEncCu::xCompressCUPart(TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, TComDataCU* pcSubBestPartCU, TComDataCU* pcSubTempPartCU,
+                             TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth) {
+  pcSubBestPartCU->initSubCU( rpcTempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
+  pcSubTempPartCU->initSubCU( rpcTempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
+
+  Bool bInSlice = pcSubBestPartCU->getSCUAddr()+pcSubBestPartCU->getTotalNumPart()>pcSlice->getSliceSegmentCurStartCUAddr()&&pcSubBestPartCU->getSCUAddr()<pcSlice->getSliceSegmentCurEndCUAddr();
+  if(bInSlice && ( pcSubBestPartCU->getCUPelX() < pcSlice->getSPS()->getPicWidthInLumaSamples() ) && ( pcSubBestPartCU->getCUPelY() < pcSlice->getSPS()->getPicHeightInLumaSamples() ) )
+  {
+    if( m_bUseSBACRD )
+    {
+      if ( 0 == uiPartUnitIdx) //initialize RD with previous depth buffer
+      {
+        m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
+      }
+      else
+      {
+        m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uhNextDepth][CI_NEXT_BEST]);
+      }
+    }
+
+#if AMP_ENC_SPEEDUP
+    if ( rpcBestCU->isIntra(0) )
+    {
+      xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth, SIZE_NONE );
+    }
+    else
+    {
+      xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth, rpcBestCU->getPartitionSize(0) );
+    }
+#else
+    xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth );
+#endif
+
+    rpcTempCU->copyPartFrom( pcSubBestPartCU, uiPartUnitIdx, uhNextDepth );         // Keep best part data to current temporary data.
+    xCopyYuv2Tmp( pcSubBestPartCU->getTotalNumPart()*uiPartUnitIdx, uhNextDepth );
+  }
+  else if (bInSlice)
+  {
+    pcSubBestPartCU->copyToPic( uhNextDepth );
+    rpcTempCU->copyPartFrom( pcSubBestPartCU, uiPartUnitIdx, uhNextDepth );
+  }
+}
+
 // ====================================================================================================================
 // Protected member functions
 // ====================================================================================================================
@@ -763,49 +806,24 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
       UChar       uhNextDepth         = uiDepth+1;
       TComDataCU* pcSubBestPartCU     = m_ppcBestCU[uhNextDepth];
       TComDataCU* pcSubTempPartCU     = m_ppcTempCU[uhNextDepth];
+/////////////////////////////////////////////////////////////////////////////
+      UInt uiMaxWidth = 64;
+      UInt uiMaxHeight = 64;
+      UInt uiNumPartitions = 1<<( ( m_uhTotalDepth - uhNextDepth - 1 )<<1 );
+      UInt uiWidth  = uiMaxWidth  >> uhNextDepth;
+      UInt uiHeight = uiMaxHeight >> uhNextDepth;
+                  
+      TComDataCU pcSubBestPartCU2;
+      TComDataCU pcSubTempPartCU2;
+      pcSubBestPartCU2.create( uiNumPartitions, uiWidth, uiHeight, false, uiMaxWidth >> (m_uhTotalDepth - 1) );
+      pcSubTempPartCU2.create( uiNumPartitions, uiWidth, uiHeight, false, uiMaxWidth >> (m_uhTotalDepth - 1) );
+/////////////////////////////////////////////////////////////////////////////////
 
-      for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++ )
-      {
-        pcSubBestPartCU->initSubCU( rpcTempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
-        pcSubTempPartCU->initSubCU( rpcTempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
-
-        Bool bInSlice = pcSubBestPartCU->getSCUAddr()+pcSubBestPartCU->getTotalNumPart()>pcSlice->getSliceSegmentCurStartCUAddr()&&pcSubBestPartCU->getSCUAddr()<pcSlice->getSliceSegmentCurEndCUAddr();
-        if(bInSlice && ( pcSubBestPartCU->getCUPelX() < pcSlice->getSPS()->getPicWidthInLumaSamples() ) && ( pcSubBestPartCU->getCUPelY() < pcSlice->getSPS()->getPicHeightInLumaSamples() ) )
-        {
-          if( m_bUseSBACRD )
-          {
-            if ( 0 == uiPartUnitIdx) //initialize RD with previous depth buffer
-            {
-              m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
-            }
-            else
-            {
-              m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uhNextDepth][CI_NEXT_BEST]);
-            }
-          }
-
-#if AMP_ENC_SPEEDUP
-          if ( rpcBestCU->isIntra(0) )
-          {
-            xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth, SIZE_NONE );
-          }
-          else
-          {
-            xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth, rpcBestCU->getPartitionSize(0) );
-          }
-#else
-          xCompressCU( pcSubBestPartCU, pcSubTempPartCU, uhNextDepth );
-#endif
-
-          rpcTempCU->copyPartFrom( pcSubBestPartCU, uiPartUnitIdx, uhNextDepth );         // Keep best part data to current temporary data.
-          xCopyYuv2Tmp( pcSubBestPartCU->getTotalNumPart()*uiPartUnitIdx, uhNextDepth );
-        }
-        else if (bInSlice)
-        {
-          pcSubBestPartCU->copyToPic( uhNextDepth );
-          rpcTempCU->copyPartFrom( pcSubBestPartCU, uiPartUnitIdx, uhNextDepth );
-        }
-      }
+      xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 0, iQP, uiDepth, uhNextDepth);
+      xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 1, iQP, uiDepth, uhNextDepth);
+      xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 2, iQP, uiDepth, uhNextDepth);
+      xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 3, iQP, uiDepth, uhNextDepth);
+      // done
 
       if( !bBoundary )
       {

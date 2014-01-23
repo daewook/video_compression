@@ -128,6 +128,10 @@ public:
 #endif
 protected:
   Void  finishCU            ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
+
+  Void  xCompressCUPart       ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, TComDataCU* pcSubBestPartCU, TComDataCU* pcSubTempPartCU,
+                              TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth);
+
 #if AMP_ENC_SPEEDUP
   Void  xCompressCU         ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth, PartSize eParentPartSize = SIZE_NONE );
 #else

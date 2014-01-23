@@ -521,7 +521,7 @@ Void TComDataCU::initCU( TComPic* pcPic, UInt iCUAddr )
 
   if ( m_pcCUAbove && ( (m_uiCUAddr%uiWidthInCU) < (uiWidthInCU-1) )  )
   {
-    m_pcCUAboveRight = pcPic->getCU( m_uiCUAddr - uiWidthInCU + 1 );
+    // m_pcCUAboveRight = pcPic->getCU( m_uiCUAddr - uiWidthInCU + 1 );
   }
 
   if ( getSlice()->getNumRefIdx( REF_PIC_LIST_0 ) > 0 )
@@ -751,7 +751,7 @@ Void TComDataCU::initSubCU( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDepth, 
   m_pcCULeft        = pcCU->getCULeft();
   m_pcCUAbove       = pcCU->getCUAbove();
   m_pcCUAboveLeft   = pcCU->getCUAboveLeft();
-  m_pcCUAboveRight  = pcCU->getCUAboveRight();
+  // m_pcCUAboveRight  = pcCU->getCUAboveRight();
 
   m_apcCUColocated[0] = pcCU->getCUColocated(REF_PIC_LIST_0);
   m_apcCUColocated[1] = pcCU->getCUColocated(REF_PIC_LIST_1);
@@ -821,7 +821,7 @@ Void TComDataCU::copySubCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   m_pbIPCMFlag         = pcCU->getIPCMFlag()        + uiPart;
 
   m_pcCUAboveLeft      = pcCU->getCUAboveLeft();
-  m_pcCUAboveRight     = pcCU->getCUAboveRight();
+  // m_pcCUAboveRight     = pcCU->getCUAboveRight();
   m_pcCUAbove          = pcCU->getCUAbove();
   m_pcCULeft           = pcCU->getCULeft();
   
@@ -868,7 +868,7 @@ Void TComDataCU::copyInterPredInfoFrom    ( TComDataCU* pcCU, UInt uiAbsPartIdx,
   m_uiCUPelY           = pcCU->getCUPelY() + m_pcPic->getMinCUHeight()*( iRastPartIdx / m_pcPic->getNumPartInWidth() );
   
   m_pcCUAboveLeft      = pcCU->getCUAboveLeft();
-  m_pcCUAboveRight     = pcCU->getCUAboveRight();
+  // m_pcCUAboveRight     = pcCU->getCUAboveRight();
   m_pcCUAbove          = pcCU->getCUAbove();
   m_pcCULeft           = pcCU->getCULeft();
   
@@ -946,7 +946,7 @@ Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDept
   memcpy( m_pbIPCMFlag + uiOffset, pcCU->getIPCMFlag(), iSizeInBool );
 
   m_pcCUAboveLeft      = pcCU->getCUAboveLeft();
-  m_pcCUAboveRight     = pcCU->getCUAboveRight();
+  // m_pcCUAboveRight     = pcCU->getCUAboveRight();
   m_pcCUAbove          = pcCU->getCUAbove();
   m_pcCULeft           = pcCU->getCULeft();
   
