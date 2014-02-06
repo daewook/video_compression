@@ -441,6 +441,7 @@ enum CI_IDX
   CI_CHROMA_INTRA,      ///< chroma intra index
   CI_QT_TRAFO_TEST,
   CI_QT_TRAFO_ROOT,
+  CI_PARALLEL_TEMP,
   CI_NUM,               ///< total number
 };
 

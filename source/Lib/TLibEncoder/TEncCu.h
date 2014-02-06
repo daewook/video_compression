@@ -96,6 +96,7 @@ private:
   // SBAC RD
   TEncSbac***             m_pppcRDSbacCoder;
   TEncSbac*               m_pcRDGoOnSbacCoder;
+  TEncSbac*               m_pcRDGoOnSbacCoderParallel;
   Bool                    m_bUseSBACRD;
   TEncRateCtrl*           m_pcRateCtrl;
 #if RATE_CONTROL_LAMBDA_DOMAIN && !M0036_RC_IMPROVEMENT
