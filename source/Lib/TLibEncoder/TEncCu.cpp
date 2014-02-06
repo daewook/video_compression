@@ -821,7 +821,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
 
       xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 0, iQP, uiDepth, uhNextDepth);
       xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 1, iQP, uiDepth, uhNextDepth);
-      xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 2, iQP, uiDepth, uhNextDepth);
+      xCompressCUPart(rpcBestCU, rpcTempCU, &pcSubBestPartCU2, &pcSubTempPartCU2, pcSlice, 2, iQP, uiDepth, uhNextDepth);
+      //cilk_sync;
       xCompressCUPart(rpcBestCU, rpcTempCU, pcSubBestPartCU, pcSubTempPartCU, pcSlice, 3, iQP, uiDepth, uhNextDepth);
       // done
 

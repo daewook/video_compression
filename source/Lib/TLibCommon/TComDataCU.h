@@ -165,7 +165,7 @@ private:
   TComDataCU*   m_pcCUAboveRight;     ///< pointer of above-right CU
   TComDataCU*   m_pcCUAbove;          ///< pointer of above CU
   TComDataCU*   m_pcCULeft;           ///< pointer of left CU
-  TComDataCU*   m_apcCUColocated[2];  ///< pointer of temporally colocated CU's for both directions
+//  TComDataCU*   m_apcCUColocated[2];  ///< pointer of temporally colocated CU's for both directions
   TComMvField   m_cMvFieldA;          ///< motion vector of position A
   TComMvField   m_cMvFieldB;          ///< motion vector of position B
   TComMvField   m_cMvFieldC;          ///< motion vector of position C
@@ -441,7 +441,7 @@ public:
   TComDataCU*   getCUAbove                  () { return m_pcCUAbove;      }
   TComDataCU*   getCUAboveLeft              () { return m_pcCUAboveLeft;  }
   TComDataCU*   getCUAboveRight             () { return m_pcCUAboveRight; }
-  TComDataCU*   getCUColocated              ( RefPicList eRefPicList ) { return m_apcCUColocated[eRefPicList]; }
+//  TComDataCU*   getCUColocated              ( RefPicList eRefPicList ) { return m_apcCUColocated[eRefPicList]; }
 
 
   TComDataCU*   getPULeft                   ( UInt&  uiLPartUnitIdx, 
