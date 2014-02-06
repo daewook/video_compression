@@ -945,10 +945,10 @@ Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDept
   
   memcpy( m_pbIPCMFlag + uiOffset, pcCU->getIPCMFlag(), iSizeInBool );
 
-  m_pcCUAboveLeft      = pcCU->getCUAboveLeft();
+//  m_pcCUAboveLeft      = pcCU->getCUAboveLeft();
   // m_pcCUAboveRight     = pcCU->getCUAboveRight();
-  m_pcCUAbove          = pcCU->getCUAbove();
-  m_pcCULeft           = pcCU->getCULeft();
+//  m_pcCUAbove          = pcCU->getCUAbove();
+//  m_pcCULeft           = pcCU->getCULeft();
   
 //  m_apcCUColocated[0] = pcCU->getCUColocated(REF_PIC_LIST_0);
 //  m_apcCUColocated[1] = pcCU->getCUColocated(REF_PIC_LIST_1);
