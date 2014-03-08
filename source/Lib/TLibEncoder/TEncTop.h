@@ -99,13 +99,13 @@ private:
   TComBitCounter          m_cBitCounter;                  ///< bit counter for RD optimization
   TComRdCost              m_cRdCost;                      ///< RD cost computation class
   TEncSbac***             m_pppcRDSbacCoder;              ///< temporal storage for RD computation
-  TEncSbac                m_cRDGoOnSbacCoder;             ///< going on SBAC model for RD stage
+  TEncSbac                m_cRDGoOnSbacCoder[2];             ///< going on SBAC model for RD stage
 #if FAST_BIT_EST
   TEncBinCABACCounter***  m_pppcBinCoderCABAC;            ///< temporal CABAC state storage for RD computation
-  TEncBinCABACCounter     m_cRDGoOnBinCoderCABAC;         ///< going on bin coder CABAC for RD stage
+  TEncBinCABACCounter     m_cRDGoOnBinCoderCABAC[2];         ///< going on bin coder CABAC for RD stage
 #else
   TEncBinCABAC***         m_pppcBinCoderCABAC;            ///< temporal CABAC state storage for RD computation
-  TEncBinCABAC            m_cRDGoOnBinCoderCABAC;         ///< going on bin coder CABAC for RD stage
+  TEncBinCABAC            m_cRDGoOnBinCoderCABAC[2];         ///< going on bin coder CABAC for RD stage
 #endif
   Int                     m_iNumSubstreams;                ///< # of top-level elements allocated.
   TComBitCounter*         m_pcBitCounters;                 ///< bit counters for RD optimization per substream
@@ -163,7 +163,8 @@ public:
   TComBitCounter*         getBitCounter         () { return  &m_cBitCounter;          }
   TComRdCost*             getRdCost             () { return  &m_cRdCost;              }
   TEncSbac***             getRDSbacCoder        () { return  m_pppcRDSbacCoder;       }
-  TEncSbac*               getRDGoOnSbacCoder    () { return  &m_cRDGoOnSbacCoder;     }
+  TEncSbac*               getRDGoOnSbacCoder    () { return  &m_cRDGoOnSbacCoder[0];     }
+  TEncSbac*               getRDGoOnSbacCoderParallel    () { return  &m_cRDGoOnSbacCoder[1];     }
   TComBitCounter*         getBitCounters        () { return  m_pcBitCounters;         }
   TComRdCost*             getRdCosts            () { return  m_pcRdCosts;             }
   TEncSbac****            getRDSbacCoders       () { return  m_ppppcRDSbacCoders;     }

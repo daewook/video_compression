@@ -56,7 +56,8 @@ TEncTop::TEncTop()
   m_uiNumAllPicCoded  =  0;
   m_pppcRDSbacCoder   =  NULL;
   m_pppcBinCoderCABAC =  NULL;
-  m_cRDGoOnSbacCoder.init( &m_cRDGoOnBinCoderCABAC );
+  m_cRDGoOnSbacCoder[0].init( &m_cRDGoOnBinCoderCABAC[0] );
+  m_cRDGoOnSbacCoder[1].init( &m_cRDGoOnBinCoderCABAC[1] );
 #if ENC_DEC_TRACE
   g_hTrace = fopen( "TraceEnc.txt", "wb" );
   g_bJustDoIt = g_bEncDecTraceDisable;
