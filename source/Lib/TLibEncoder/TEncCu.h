@@ -64,11 +64,27 @@ class TEncSlice;
 /// CU encoder class
 class TEncCu
 {
+  struct DATA{
+    TComDataCU* bestCU;
+    TComDataCU* tempCU;
+
+    TComYuv*    predYuvBest; ///< Best Prediction Yuv for each depth
+    TComYuv*    resiYuvBest; ///< Best Residual Yuv for each depth
+    TComYuv*    recoYuvBest; ///< Best Reconstruction Yuv for each depth
+    TComYuv*    predYuvTemp; ///< Temporary Prediction Yuv for each depth
+    TComYuv*    resiYuvTemp; ///< Temporary Residual Yuv for each depth
+    TComYuv*    recoYuvTemp; ///< Temporary Reconstruction Yuv for each depth
+    TComYuv*    origYuv;     ///< Original Yuv for each depth
+  };
+  typedef struct DATA DATA;
+
 private:
   
-  TComDataCU**            m_ppcBestCU;      ///< Best CUs in each depth
-  TComDataCU**            m_ppcTempCU;      ///< Temporary CUs in each depth
+//  TComDataCU**            m_ppcBestCU;      ///< Best CUs in each depth
+//  TComDataCU**            m_ppcTempCU;      ///< Temporary CUs in each depth
   UChar                   m_uhTotalDepth;
+  UInt                    m_uiMaxWidth;
+  UInt                    m_uiMaxHeight;
   
   TComYuv**               m_ppcPredYuvBest; ///< Best Prediction Yuv for each depth
   TComYuv**               m_ppcResiYuvBest; ///< Best Residual Yuv for each depth
@@ -127,13 +143,15 @@ public:
   Int   updateLCUDataISlice ( TComDataCU* pcCU, Int LCUIdx, Int width, Int height );
 #endif
 protected:
+  Void  create_DATA         ( DATA& data, UInt depth );
+  Void  destroy_DATA        ( DATA& data );
+
   Void  finishCU            ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
 
-  Void  xCompressCUPart       ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, TComDataCU* pcSubBestPartCU, TComDataCU* pcSubTempPartCU,
-                              TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth);
+  Void  xCompressCUPart     ( DATA &data, DATA &subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best);
 
 #if AMP_ENC_SPEEDUP
-  Void  xCompressCU         ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth, PartSize eParentPartSize = SIZE_NONE );
+  Void  xCompressCU         ( DATA &data, UInt uiDepth, TEncSbac* curr_sbac, PartSize eParentPartSize = SIZE_NONE);
 #else
   Void  xCompressCU         ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth        );
 #endif
