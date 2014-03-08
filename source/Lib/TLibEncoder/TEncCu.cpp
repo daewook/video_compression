@@ -220,7 +220,6 @@ Void TEncCu::init( TEncTop* pcEncTop )
   
   m_pppcRDSbacCoder   = pcEncTop->getRDSbacCoder();
   m_pcRDGoOnSbacCoder = pcEncTop->getRDGoOnSbacCoder();
-  m_pcRDGoOnSbacCoderParallel = pcEncTop->getRDGoOnSbacCoderParallel();
   
   m_bUseSBACRD        = pcEncTop->getUseSBACRD();
   m_pcRateCtrl        = pcEncTop->getRateCtrl();
@@ -387,10 +386,6 @@ Void TEncCu::xCompressCUPart(DATA &data, DATA &subData, TComSlice* pcSlice, UInt
         m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
 //        m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->init(cabac1);
       }
-/*      else if (1 == uiPartUnitIdx)
-      {
-        m_pppcRDSbacCoder[uhNextDepth][CI_PARALLEL_TEMP]->load(m_pppcRDSbacCoder[uhNextDepth][CI_NEXT_BEST]);
-      }*/
       else
       {
         m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uhNextDepth][CI_NEXT_BEST]);
