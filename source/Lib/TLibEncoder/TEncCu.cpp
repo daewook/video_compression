@@ -508,7 +508,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& tempCU, UInt uiDe
   TComPic* pcPic = bestCU->getPic();
 
   // get Original YUV data from picture
-  m_ppcOrigYuv[uiDepth]->copyFromPicYuv( pcPic->getPicYuvOrg(), bestCU->getAddr(), bestCU->getZorderIdxInCU() );
+  data.origYuv->copyFromPicYuv( pcPic->getPicYuvOrg(), bestCU->getAddr(), bestCU->getZorderIdxInCU() );
 
   // variable for Early CU determination
   Bool    bSubBranch = true;
@@ -842,7 +842,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& tempCU, UInt uiDe
   // copy orginal YUV samples to PCM buffer
   if( bestCU->isLosslessCoded(0) && (bestCU->getIPCMFlag(0) == false))
   {
-    xFillPCMBuffer(bestCU, m_ppcOrigYuv[uiDepth]);
+    xFillPCMBuffer(bestCU, data.origYuv);
   }
   if( (g_uiMaxCUWidth>>uiDepth) == tempCU->getSlice()->getPPS()->getMinCuDQPSize() )
   {
@@ -1436,7 +1436,7 @@ Void TEncCu::xCheckRDCostMerge2Nx2N( DATA &data, Bool *earlyDetectionSkipMode )
           m_pcPredSearch->motionCompensation ( data.tempCU, data.predYuvTemp );
           // estimate residual and encode everything
           m_pcPredSearch->encodeResAndCalcRdInterCU( data.tempCU,
-                                                    m_ppcOrigYuv    [uhDepth],
+                                                     data.origYuv,
                                                     data.predYuvTemp,
                                                     m_ppcResiYuvTemp[uhDepth],
                                                     m_ppcResiYuvBest[uhDepth],
@@ -1515,9 +1515,9 @@ Void TEncCu::xCheckRDCostInter( DATA &data, PartSize ePartSize )
   
 #if AMP_MRG
   data.tempCU->setMergeAMP (true);
-  m_pcPredSearch->predInterSearch ( data.tempCU, m_ppcOrigYuv[uhDepth], data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth], false, bUseMRG );
+  m_pcPredSearch->predInterSearch ( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth], false, bUseMRG );
 #else  
-  m_pcPredSearch->predInterSearch ( data.tempCU, m_ppcOrigYuv[uhDepth], data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth] );
+  m_pcPredSearch->predInterSearch ( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth] );
 #endif
 
 #if AMP_MRG
@@ -1531,13 +1531,13 @@ Void TEncCu::xCheckRDCostInter( DATA &data, PartSize ePartSize )
   if ( m_pcEncCfg->getUseRateCtrl() && m_pcEncCfg->getLCULevelRC() && ePartSize == SIZE_2Nx2N && uhDepth <= m_addSADDepth )
   {
     UInt SAD = m_pcRdCost->getSADPart( g_bitDepthY, data.predYuvTemp->getLumaAddr(), data.predYuvTemp->getStride(),
-      m_ppcOrigYuv[uhDepth]->getLumaAddr(), m_ppcOrigYuv[uhDepth]->getStride(),
+      data.origYuv->getLumaAddr(), data.origYuv->getStride(),
       data.tempCU->getWidth(0), data.tempCU->getHeight(0) );
     m_temporalSAD = (Int)SAD;
   }
 #endif
 
-  m_pcPredSearch->encodeResAndCalcRdInterCU( data.tempCU, m_ppcOrigYuv[uhDepth], data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcResiYuvBest[uhDepth], m_ppcRecoYuvTemp[uhDepth], false );
+  m_pcPredSearch->encodeResAndCalcRdInterCU( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uhDepth], m_ppcResiYuvBest[uhDepth], m_ppcRecoYuvTemp[uhDepth], false );
   data.tempCU->getTotalCost()  = m_pcRdCost->calcRdCost( data.tempCU->getTotalBits(), data.tempCU->getTotalDistortion() );
 
   xCheckDQP( data.tempCU );
@@ -1558,13 +1558,13 @@ Void TEncCu::xCheckRDCostIntra( DATA &data, PartSize eSize )
   UInt uiPreCalcDistC      = 0;
   if( !bSeparateLumaChroma )
   {
-    m_pcPredSearch->preestChromaPredMode( data.tempCU, m_ppcOrigYuv[uiDepth], data.predYuvTemp );
+    m_pcPredSearch->preestChromaPredMode( data.tempCU, data.origYuv, data.predYuvTemp );
   }
-  m_pcPredSearch  ->estIntraPredQT      ( data.tempCU, m_ppcOrigYuv[uiDepth], data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth], uiPreCalcDistC, bSeparateLumaChroma );
+  m_pcPredSearch  ->estIntraPredQT      ( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth], uiPreCalcDistC, bSeparateLumaChroma );
 
   m_ppcRecoYuvTemp[uiDepth]->copyToPicLuma(data.tempCU->getPic()->getPicYuvRec(), data.tempCU->getAddr(), data.tempCU->getZorderIdxInCU() );
   
-  m_pcPredSearch  ->estIntraPredChromaQT( data.tempCU, m_ppcOrigYuv[uiDepth], data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth], uiPreCalcDistC );
+  m_pcPredSearch  ->estIntraPredChromaQT( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth], uiPreCalcDistC );
   
   m_pcEntropyCoder->resetBits();
   if ( data.tempCU->getSlice()->getPPS()->getTransquantBypassEnableFlag())
@@ -1615,7 +1615,7 @@ Void TEncCu::xCheckIntraPCM( DATA &data )
   data.tempCU->setTrIdxSubParts ( 0, 0, uiDepth );
   data.tempCU->setCUTransquantBypassSubParts( m_pcEncCfg->getCUTransquantBypassFlagValue(), 0, uiDepth );
 
-  m_pcPredSearch->IPCMSearch( data.tempCU, m_ppcOrigYuv[uiDepth], data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth]);
+  m_pcPredSearch->IPCMSearch( data.tempCU, data.origYuv, data.predYuvTemp, m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth]);
 
   if( m_bUseSBACRD ) m_pcRDGoOnSbacCoder->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
 
