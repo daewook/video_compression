@@ -73,7 +73,7 @@ Void TEncCu::create(UChar uhTotalDepth, UInt uiMaxWidth, UInt uiMaxHeight)
 //  m_ppcPredYuvTemp = new TComYuv*[m_uhTotalDepth-1];
   m_ppcResiYuvTemp = new TComYuv*[m_uhTotalDepth-1];
   m_ppcRecoYuvTemp = new TComYuv*[m_uhTotalDepth-1];
-  m_ppcOrigYuv     = new TComYuv*[m_uhTotalDepth-1];
+//  m_ppcOrigYuv     = new TComYuv*[m_uhTotalDepth-1];
   
   UInt uiNumPartitions;
   for( i=0 ; i<m_uhTotalDepth-1 ; i++)
@@ -93,7 +93,7 @@ Void TEncCu::create(UChar uhTotalDepth, UInt uiMaxWidth, UInt uiMaxHeight)
     m_ppcResiYuvTemp[i] = new TComYuv; m_ppcResiYuvTemp[i]->create(uiWidth, uiHeight);
     m_ppcRecoYuvTemp[i] = new TComYuv; m_ppcRecoYuvTemp[i]->create(uiWidth, uiHeight);
     
-    m_ppcOrigYuv    [i] = new TComYuv; m_ppcOrigYuv    [i]->create(uiWidth, uiHeight);
+//    m_ppcOrigYuv    [i] = new TComYuv; m_ppcOrigYuv    [i]->create(uiWidth, uiHeight);
   }
   
   m_bEncodeDQP = false;
@@ -150,10 +150,10 @@ Void TEncCu::destroy()
     {
       m_ppcRecoYuvTemp[i]->destroy(); delete m_ppcRecoYuvTemp[i]; m_ppcRecoYuvTemp[i] = NULL;
     }
-    if(m_ppcOrigYuv[i])
+/*    if(m_ppcOrigYuv[i])
     {
       m_ppcOrigYuv[i]->destroy();     delete m_ppcOrigYuv[i];     m_ppcOrigYuv[i] = NULL;
-    }
+    }*/
   }
 /* if(m_ppcBestCU)
   {
@@ -196,11 +196,11 @@ Void TEncCu::destroy()
     delete [] m_ppcRecoYuvTemp;
     m_ppcRecoYuvTemp = NULL;
   }
-  if(m_ppcOrigYuv)
+/*  if(m_ppcOrigYuv)
   {
     delete [] m_ppcOrigYuv;
     m_ppcOrigYuv = NULL;
-  }
+  }*/
 }
 
 /** \param    pcEncTop      pointer of encoder class

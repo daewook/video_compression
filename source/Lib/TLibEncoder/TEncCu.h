@@ -92,7 +92,7 @@ private:
 //  TComYuv**               m_ppcPredYuvTemp; ///< Temporary Prediction Yuv for each depth
   TComYuv**               m_ppcResiYuvTemp; ///< Temporary Residual Yuv for each depth
   TComYuv**               m_ppcRecoYuvTemp; ///< Temporary Reconstruction Yuv for each depth
-  TComYuv**               m_ppcOrigYuv;     ///< Original Yuv for each depth
+//  TComYuv**               m_ppcOrigYuv;     ///< Original Yuv for each depth
   
   //  Data : encoder control
   Bool                    m_bEncodeDQP;
