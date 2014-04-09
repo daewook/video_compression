@@ -273,6 +273,10 @@ Void TEncTop::destroy ()
   return;
 }
 
+Void TEncTop::init_TEncSearch(TEncSearch *search) {
+  search->init( this, &m_cTrQuant, m_iSearchRange, m_bipredSearchRange, m_iFastSearch, 0, &m_cEntropyCoder, &m_cRdCost, getRDSbacCoder(), getRDGoOnSbacCoder() );
+}
+
 Void TEncTop::init(Bool isFieldCoding)
 {
   // initialize SPS
@@ -307,7 +311,8 @@ Void TEncTop::init(Bool isFieldCoding)
                   );
   
   // initialize encoder search class
-  m_cSearch.init( this, &m_cTrQuant, m_iSearchRange, m_bipredSearchRange, m_iFastSearch, 0, &m_cEntropyCoder, &m_cRdCost, getRDSbacCoder(), getRDGoOnSbacCoder() );
+//  m_cSearch.init( this, &m_cTrQuant, m_iSearchRange, m_bipredSearchRange, m_iFastSearch, 0, &m_cEntropyCoder, &m_cRdCost, getRDSbacCoder(), getRDGoOnSbacCoder() );
+  init_TEncSearch(&m_cSearch);
 
   m_iMaxRefPicNum = 0;
 }

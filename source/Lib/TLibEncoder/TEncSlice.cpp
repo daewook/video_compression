@@ -623,6 +623,29 @@ Void TEncSlice::setSearchRange( TComSlice* pcSlice )
   }
 }
 
+Void TEncSlice::init_searchRange( TEncSearch* search, TComSlice* pcSlice )
+{
+  Int iCurrPOC = pcSlice->getPOC();
+  Int iRefPOC;
+  Int iGOPSize = m_pcCfg->getGOPSize();
+  Int iOffset = (iGOPSize >> 1);
+  Int iMaxSR = m_pcCfg->getSearchRange();
+  Int iNumPredDir = pcSlice->isInterP() ? 1 : 2;
+ 
+  for (Int iDir = 0; iDir <= iNumPredDir; iDir++)
+  {
+    //RefPicList e = (RefPicList)iDir;
+    RefPicList  e = ( iDir ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
+    for (Int iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(e); iRefIdx++)
+    {
+      iRefPOC = pcSlice->getRefPic(e, iRefIdx)->getPOC();
+      Int iNewSR = Clip3(8, iMaxSR, (iMaxSR*ADAPT_SR_SCALE*abs(iCurrPOC - iRefPOC)+iOffset)/iGOPSize);
+      search->setAdaptiveSearchRange(iDir, iRefIdx, iNewSR);
+    }
+  }
+}
+
+
 /**
  - multi-loop slice encoding for different slice QP
  .
@@ -1106,7 +1129,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
 #endif
 
       // run CU encoder
-      m_pcCuEncoder->compressCU( pcCU );
+      m_pcCuEncoder->compressCU( this, pcCU );
 
 #if !TICKET_1090_FIX
 #if RATE_CONTROL_LAMBDA_DOMAIN
@@ -1234,7 +1257,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     // other case: encodeCU is not called
     else
     {
-      m_pcCuEncoder->compressCU( pcCU );
+      m_pcCuEncoder->compressCU( this, pcCU );
       m_pcCuEncoder->encodeCU( pcCU );
       if (m_pcCfg->getSliceMode()==FIXED_NUMBER_OF_BYTES && ( ( pcSlice->getSliceBits()+ m_pcEntropyCoder->getNumberOfWrittenBits() ) ) > m_pcCfg->getSliceArgument()<<3)
       {

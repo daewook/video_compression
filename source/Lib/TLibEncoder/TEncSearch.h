@@ -168,6 +168,17 @@ protected:
   Void xGetInterPredictionError( TComDataCU* pcCU, TComYuv* pcYuvOrg, Int iPartIdx, UInt& ruiSAD, Bool Hadamard );
 
 public:
+  Int * get_aaiAdaptSR () {return (Int *)m_aaiAdaptSR;}
+
+  Void  copySearchRange (TEncSearch *search) {
+    Int * aaiAdaptSR = search->get_aaiAdaptSR();
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 33; j++) {
+        m_aaiAdaptSR[i][j] = aaiAdaptSR[i*33 + j];
+      }
+    }
+  }
+
   Void  preestChromaPredMode    ( TComDataCU* pcCU, 
                                   TComYuv*    pcOrgYuv, 
                                   TComYuv*    pcPredYuv );
@@ -209,6 +220,7 @@ public:
   
   /// set ME search range
   Void setAdaptiveSearchRange   ( Int iDir, Int iRefIdx, Int iSearchRange) { m_aaiAdaptSR[iDir][iRefIdx] = iSearchRange; }
+  Void copyAdaptiveSearchRange  ( TEncSearch *search);
   
   Void xEncPCM    (TComDataCU* pcCU, UInt uiAbsPartIdx, Pel* piOrg, Pel* piPCM, Pel* piPred, Pel* piResi, Pel* piReco, UInt uiStride, UInt uiWidth, UInt uiHeight, TextType eText);
   Void IPCMSearch (TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv*& rpcPredYuv, TComYuv*& rpcResiYuv, TComYuv*& rpcRecoYuv );

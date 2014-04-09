@@ -128,9 +128,10 @@ public:
   
   /// destroy internal buffers
   Void  destroy             ();
-  
+ 
+  Void init_predSearch      (TEncSearch *search);
   /// CU analysis function
-  Void  compressCU          ( TComDataCU*&  rpcCU );
+  Void  compressCU          ( TEncSlice *slice, TComDataCU*&  rpcCU );
   
   /// CU encoding function
   Void  encodeCU            ( TComDataCU*    pcCU );
@@ -148,29 +149,29 @@ protected:
 
   Void  finishCU            ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
 
-  Void  xCompressCUPart     ( DATA &data, DATA &subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best);
+  Void  xCompressCUPart     ( TEncSearch *search, DATA &data, DATA &subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best);
 
 #if AMP_ENC_SPEEDUP
-  Void  xCompressCU         ( DATA &data, UInt uiDepth, TEncSbac* curr_sbac, PartSize eParentPartSize = SIZE_NONE);
+  Void  xCompressCU         ( TEncSearch *search, DATA &data, UInt uiDepth, TEncSbac* curr_sbac, PartSize eParentPartSize = SIZE_NONE);
 #else
-  Void  xCompressCU         ( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth        );
+  Void  xCompressCU         ( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth        );
 #endif
   Void  xEncodeCU           ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
   
   Int   xComputeQP          ( TComDataCU* pcCU, UInt uiDepth );
   Void  xCheckBestMode      ( DATA &data, UInt uiDepth        );
   
-  Void  xCheckRDCostMerge2Nx2N( DATA &data, Bool *earlyDetectionSkipMode);
+  Void  xCheckRDCostMerge2Nx2N( TEncSearch *search, DATA &data, Bool *earlyDetectionSkipMode);
 
 #if AMP_MRG
-  Void  xCheckRDCostInter   ( DATA &data, PartSize ePartSize, Bool bUseMRG = false  );
+  Void  xCheckRDCostInter   ( TEncSearch *search, DATA &data, PartSize ePartSize, Bool bUseMRG = false  );
 #else
-  Void  xCheckRDCostInter   ( DATA &data, PartSize ePartSize  );
+  Void  xCheckRDCostInter   ( TEncSearch *search, DATA &data, PartSize ePartSize  );
 #endif
-  Void  xCheckRDCostIntra   ( DATA &data, PartSize ePartSize  );
+  Void  xCheckRDCostIntra   ( TEncSearch *search, DATA &data, PartSize ePartSize  );
   Void  xCheckDQP           ( TComDataCU*  pcCU );
   
-  Void  xCheckIntraPCM      ( DATA &data                     );
+  Void  xCheckIntraPCM      ( TEncSearch *search, DATA &data                     );
   Void  xCopyAMVPInfo       ( AMVPInfo* pSrc, AMVPInfo* pDst );
   Void  xCopyYuv2Pic        ( TComPic* rpcPic, UInt uiCUAddr, UInt uiAbsPartIdx, UInt uiDepth, UInt uiSrcDepth, TComDataCU* pcCU, UInt uiLPelX, UInt uiTPelY, DATA &data );
   Void  xCopyYuv2Tmp        ( DATA &data, DATA &subData, UInt uhPartUnitIdx, UInt uiDepth );
