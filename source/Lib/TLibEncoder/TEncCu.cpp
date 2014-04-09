@@ -209,14 +209,14 @@ Void TEncCu::init( TEncTop* pcEncTop )
 {
   m_pcEncCfg           = pcEncTop;
   m_pcPredSearch       = pcEncTop->getPredSearch();
-  m_pcTrQuant          = pcEncTop->getTrQuant();
-  m_pcBitCounter       = pcEncTop->getBitCounter();
-  m_pcRdCost           = pcEncTop->getRdCost();
+  m_pcTrQuant          = pcEncTop->getTrQuant(); // doesn't need to be parallelized
+  m_pcBitCounter       = pcEncTop->getBitCounter(); // doesn't need to be parallelized
+  m_pcRdCost           = pcEncTop->getRdCost(); // doesn't need to be parallelized
   
   m_pcEntropyCoder     = pcEncTop->getEntropyCoder();
-  m_pcCavlcCoder       = pcEncTop->getCavlcCoder();
-  m_pcSbacCoder       = pcEncTop->getSbacCoder();
-  m_pcBinCABAC         = pcEncTop->getBinCABAC();
+//  m_pcCavlcCoder       = pcEncTop->getCavlcCoder();
+//  m_pcSbacCoder       = pcEncTop->getSbacCoder();
+//  m_pcBinCABAC         = pcEncTop->getBinCABAC();
   
   m_pppcRDSbacCoder   = pcEncTop->getRDSbacCoder();
   m_pcRDGoOnSbacCoder = pcEncTop->getRDGoOnSbacCoder();

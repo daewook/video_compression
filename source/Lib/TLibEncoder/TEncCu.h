@@ -105,9 +105,9 @@ private:
   TComRdCost*             m_pcRdCost;
   
   TEncEntropy*            m_pcEntropyCoder;
-  TEncCavlc*              m_pcCavlcCoder;
-  TEncSbac*               m_pcSbacCoder;
-  TEncBinCABAC*           m_pcBinCABAC;
+//  TEncCavlc*              m_pcCavlcCoder;
+//  TEncSbac*               m_pcSbacCoder;
+//  TEncBinCABAC*           m_pcBinCABAC;
   
   // SBAC RD
   TEncSbac***             m_pppcRDSbacCoder;
