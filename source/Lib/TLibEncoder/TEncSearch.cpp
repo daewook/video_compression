@@ -2369,7 +2369,29 @@ TEncSearch::xSetIntraResultChromaQT( TComDataCU* pcCU,
     }
   }
 }
+// here here
+Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder) {
+}
 
+Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* RDGoOnSbacCoder) {
+}
+
+Void TEncSearch::copyRDSbacCoder(TEncSbac*** RDSbacCoder) {
+}
+
+Void TEncSearch::copyTrQuant(TComTrQuant* trQuant) {
+}
+
+Void TEncSearch::copyPcRdCost(TComRdCost* pcRdCost) {
+}
+
+Void TEncSearch::copySearch(TEncSearch *search) {
+  copyEntropyCoder(search->getEntropyCoder());
+  copyRDGoOnSbacCoder(search->getRDGoOnSbacCoder());
+  copyRDSbacCoder(search->getRDSbacCoder());
+  copyTrQuant(search->getTrQuant());
+  copyPcRdCost(search->getPcRdCost());
+}
 
 Void 
 TEncSearch::preestChromaPredMode( TComDataCU* pcCU, 
