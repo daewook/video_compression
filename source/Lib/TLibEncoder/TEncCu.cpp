@@ -946,11 +946,11 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       // init TEncSearch
       TEncSearch search2;
       init_predSearch(&search2);
-      search2.copySearch(search);
+      search2.copySearch(search, pcSlice);
 
       xCompressCUPart(&search2, data, subData, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
 
-      search->copySearch(&search2);
+      search->copySearch(&search2, pcSlice);
       //cilk_sync;
       xCompressCUPart(search, data, subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);
       // done

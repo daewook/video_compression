@@ -2370,7 +2370,9 @@ TEncSearch::xSetIntraResultChromaQT( TComDataCU* pcCU,
   }
 }
 // here here
-Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder) {
+Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice) {
+  m_pcEntropyCoder = new TEncEntropy;
+  m_pcEntropyCoder->setEntropyCoder (m_pcRDGoOnSbacCoder, pcSlice);
 }
 
 Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* previousCoder) {
@@ -2425,11 +2427,11 @@ Void TEncSearch::copyPcRdCost(TComRdCost* pcRdCost) {
   // TODO: copy m_mvPredPredictor?
 }
 
-Void TEncSearch::copySearch(TEncSearch *search) {
-  copyEntropyCoder(search->getEntropyCoder());
+Void TEncSearch::copySearch(TEncSearch *search, TComSlice *pcSlice) {
   copyRDGoOnSbacCoder(search->getRDGoOnSbacCoder());
   copyRDSbacCoder(search->getRDSbacCoder());
   copyPcRdCost(search->getPcRdCost());
+  copyEntropyCoder(search->getEntropyCoder(), pcSlice);
 }
 
 Void 

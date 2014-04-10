@@ -177,8 +177,8 @@ public:
 //  TComTrQuant* getTrQuant() {return m_pcTrQuant;}
   TComRdCost* getPcRdCost() {return m_pcRdCost;}
 
-  Void copySearch(TEncSearch *search);
-  Void copyEntropyCoder(TEncEntropy* entropyCoder);
+  Void copySearch(TEncSearch *search, TComSlice *pcSlice);
+  Void copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice);
   Void copyRDGoOnSbacCoder(TEncSbac* RDGoOnSbacCoder);
   Void copyRDSbacCoder(TEncSbac*** RDSbacCoder);
 //  Void copyTrQuant(TComTrQuant* trQuant);
