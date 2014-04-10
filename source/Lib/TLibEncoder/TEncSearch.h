@@ -174,14 +174,14 @@ public:
   TEncEntropy* getEntropyCoder() {return m_pcEntropyCoder;}
   TEncSbac* getRDGoOnSbacCoder() {return m_pcRDGoOnSbacCoder;}
   TEncSbac*** getRDSbacCoder() {return m_pppcRDSbacCoder;}
-  TComTrQuant* getTrQuant() {return m_pcTrQuant;}
+//  TComTrQuant* getTrQuant() {return m_pcTrQuant;}
   TComRdCost* getPcRdCost() {return m_pcRdCost;}
 
   Void copySearch(TEncSearch *search);
   Void copyEntropyCoder(TEncEntropy* entropyCoder);
   Void copyRDGoOnSbacCoder(TEncSbac* RDGoOnSbacCoder);
   Void copyRDSbacCoder(TEncSbac*** RDSbacCoder);
-  Void copyTrQuant(TComTrQuant* trQuant);
+//  Void copyTrQuant(TComTrQuant* trQuant);
   Void copyPcRdCost(TComRdCost* pcRdCost);
 
   Void  copySearchRange (TEncSearch *search) {

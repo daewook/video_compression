@@ -159,7 +159,7 @@ protected:
   Void  xEncodeCU           ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
   
   Int   xComputeQP          ( TComDataCU* pcCU, UInt uiDepth );
-  Void  xCheckBestMode      ( DATA &data, UInt uiDepth        );
+  Void  xCheckBestMode      ( TEncSearch *search, DATA &data, UInt uiDepth        );
   
   Void  xCheckRDCostMerge2Nx2N( TEncSearch *search, DATA &data, Bool *earlyDetectionSkipMode);
 
@@ -169,7 +169,7 @@ protected:
   Void  xCheckRDCostInter   ( TEncSearch *search, DATA &data, PartSize ePartSize  );
 #endif
   Void  xCheckRDCostIntra   ( TEncSearch *search, DATA &data, PartSize ePartSize  );
-  Void  xCheckDQP           ( TComDataCU*  pcCU );
+  Void  xCheckDQP           ( TEncSearch *search, TComDataCU*  pcCU );
   
   Void  xCheckIntraPCM      ( TEncSearch *search, DATA &data                     );
   Void  xCopyAMVPInfo       ( AMVPInfo* pSrc, AMVPInfo* pDst );
