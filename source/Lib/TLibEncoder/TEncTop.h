@@ -134,6 +134,7 @@ public:
   virtual ~TEncTop();
   
   Void      create          ();
+
   Void      destroy         ();
   Void      init            (Bool isFieldCoding);
   Void      deletePicBuffer ();

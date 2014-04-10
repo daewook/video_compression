@@ -939,14 +939,18 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
 //      m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
 
 
+      xCompressCUPart(search, data, subData, pcSlice, 0, iQP, uiDepth, uhNextDepth, sbac1);
+
+      xCompressCUPart(search, data, subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
+
       // init TEncSearch
       TEncSearch search2;
       init_predSearch(&search2);
       search2.copySearch(search);
 
-      xCompressCUPart(search, data, subData, pcSlice, 0, iQP, uiDepth, uhNextDepth, sbac1);
-      xCompressCUPart(search, data, subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
       xCompressCUPart(&search2, data, subData, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
+
+      search->copySearch(&search2);
       //cilk_sync;
       xCompressCUPart(search, data, subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);
       // done
