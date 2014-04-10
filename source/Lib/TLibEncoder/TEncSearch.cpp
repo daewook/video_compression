@@ -2409,8 +2409,20 @@ Void TEncSearch::copyRDSbacCoder(TEncSbac*** previousCoder) {
 }
 
 Void TEncSearch::copyPcRdCost(TComRdCost* pcRdCost) {
-//  m_pcRdCost = new TComRdCost;
-//  m_pcRdCost->init();
+  m_pcRdCost = new TComRdCost;
+  m_pcRdCost->init();
+  
+  m_pcRdCost->m_cbDistortionWeight = pcRdCost->m_cbDistortionWeight;
+  m_pcRdCost->m_crDistortionWeight = pcRdCost->m_crDistortionWeight; 
+  m_pcRdCost->m_dLambda = pcRdCost->m_dLambda;
+  m_pcRdCost->m_sqrtLambda = pcRdCost->m_sqrtLambda;
+  m_pcRdCost->m_uiLambdaMotionSAD = pcRdCost->m_uiLambdaMotionSAD;
+  m_pcRdCost->m_uiLambdaMotionSSE = pcRdCost->m_uiLambdaMotionSSE;
+  m_pcRdCost->m_dFrameLambda = pcRdCost->m_dFrameLambda;
+  m_pcRdCost->m_uiCost = pcRdCost->m_uiCost;
+  m_pcRdCost->m_iCostScale = pcRdCost->m_iCostScale;
+
+  // TODO: copy m_mvPredPredictor?
 }
 
 Void TEncSearch::copySearch(TEncSearch *search) {

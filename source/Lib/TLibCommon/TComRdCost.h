@@ -114,8 +114,9 @@ class TComRdCost
   : public TComRdCostWeightPrediction
 {
 private:
+ 
+public:
   // for distortion
-  
 #if AMP_SAD
   FpDistFunc              m_afpDistortFunc[64]; // [eDFunc]
 #else  
@@ -146,8 +147,7 @@ private:
 #if !FIX203
   Int                     m_iSearchLimit;
 #endif
-  
-public:
+ 
   TComRdCost();
   virtual ~TComRdCost();
   
