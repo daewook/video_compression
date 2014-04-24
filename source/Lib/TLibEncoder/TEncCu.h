@@ -149,7 +149,7 @@ protected:
 
   Void  finishCU            ( TComDataCU*  pcCU, UInt uiAbsPartIdx,           UInt uiDepth        );
 
-  Void  xCompressCUPart     ( TEncSearch *search, DATA &data, DATA &subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best);
+  Void  xCompressCUPart     ( TEncSearch *search, DATA *data, DATA *subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP, UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best);
 
 #if AMP_ENC_SPEEDUP
   Void  xCompressCU         ( TEncSearch *search, DATA &data, UInt uiDepth, TEncSbac* curr_sbac, PartSize eParentPartSize = SIZE_NONE);

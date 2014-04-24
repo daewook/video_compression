@@ -377,16 +377,19 @@ Void TEncCu::deriveTestModeAMP (TComDataCU *&rpcBestCU, PartSize eParentPartSize
 #define TEST_SBAC 0
 #endif
 
-Void TEncCu::xCompressCUPart(TEncSearch *search, DATA &data, DATA &subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP,
+Void TEncCu::xCompressCUPart(TEncSearch *search, DATA *data, DATA *subData, TComSlice* pcSlice, UInt uiPartUnitIdx, UInt iQP,
                              UInt uiDepth, UInt uhNextDepth, TEncSbac* pppcRDSbacCoder_curr_best) {
-  subData.bestCU->initSubCU( data.tempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
-  subData.tempCU->initSubCU( data.tempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
 
-  Bool bInSlice = subData.bestCU->getSCUAddr()+subData.bestCU->getTotalNumPart()>pcSlice->getSliceSegmentCurStartCUAddr()&&subData.bestCU->getSCUAddr()<pcSlice->getSliceSegmentCurEndCUAddr();
+//  printf("part start %d: %p %p\n",(int)uiDepth, data, subData);
+
+  subData->bestCU->initSubCU( data->tempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
+  subData->tempCU->initSubCU( data->tempCU, uiPartUnitIdx, uhNextDepth, iQP );           // clear sub partition datas or init.
+
+  Bool bInSlice = subData->bestCU->getSCUAddr()+subData->bestCU->getTotalNumPart()>pcSlice->getSliceSegmentCurStartCUAddr()&&subData->bestCU->getSCUAddr()<pcSlice->getSliceSegmentCurEndCUAddr();
 
 
-  TEncBinCABAC *cabac1 = new TEncBinCABAC;
-  if(bInSlice && ( subData.bestCU->getCUPelX() < pcSlice->getSPS()->getPicWidthInLumaSamples() ) && ( subData.bestCU->getCUPelY() < pcSlice->getSPS()->getPicHeightInLumaSamples() ) )
+//  TEncBinCABAC *cabac1 = new TEncBinCABAC;
+  if(bInSlice && ( subData->bestCU->getCUPelX() < pcSlice->getSPS()->getPicWidthInLumaSamples() ) && ( subData->bestCU->getCUPelY() < pcSlice->getSPS()->getPicHeightInLumaSamples() ) )
   {
     if( m_bUseSBACRD )
     {
@@ -408,25 +411,25 @@ Void TEncCu::xCompressCUPart(TEncSearch *search, DATA &data, DATA &subData, TCom
 #endif
 
 #if AMP_ENC_SPEEDUP
-    if ( data.bestCU->isIntra(0) )
+    if ( data->bestCU->isIntra(0) )
     {
-      xCompressCU( search, subData, uhNextDepth, NULL, SIZE_NONE);
+      xCompressCU( search, *subData, uhNextDepth, NULL, SIZE_NONE);
     }
     else
     {
-      xCompressCU( search, subData, uhNextDepth, NULL, data.bestCU->getPartitionSize(0));
+      xCompressCU( search, *subData, uhNextDepth, NULL, data->bestCU->getPartitionSize(0));
     }
 #else
-    xCompressCU( search, subData, uhNextDepth );
+    xCompressCU( search, *subData, uhNextDepth );
 #endif
 
-    data.tempCU->copyPartFrom( subData.bestCU, uiPartUnitIdx, uhNextDepth );         // Keep best part data to current temporary data.
-    xCopyYuv2Tmp( data, subData, subData.bestCU->getTotalNumPart()*uiPartUnitIdx, uhNextDepth );
+    data->tempCU->copyPartFrom( subData->bestCU, uiPartUnitIdx, uhNextDepth );         // Keep best part data to current temporary data.
+    xCopyYuv2Tmp( *data, *subData, subData->bestCU->getTotalNumPart()*uiPartUnitIdx, uhNextDepth );
   }
   else if (bInSlice)
   {
-    subData.bestCU->copyToPic( uhNextDepth );
-    data.tempCU->copyPartFrom( subData.bestCU, uiPartUnitIdx, uhNextDepth );
+    subData->bestCU->copyToPic( uhNextDepth );
+    data->tempCU->copyPartFrom( subData->bestCU, uiPartUnitIdx, uhNextDepth );
   }
 }
 
@@ -449,8 +452,8 @@ Void TEncCu::create_DATA(DATA& data, UInt depth) {
   data.recoYuvTemp = new TComYuv;
   data.origYuv = new TComYuv;
 
-  data.bestCU->create( uiNumPartitions, uiWidth, uiHeight, false, uiNumPartitions );
-  data.tempCU->create( uiNumPartitions, uiWidth, uiHeight, false, uiNumPartitions );
+  data.bestCU->create( uiNumPartitions, uiWidth, uiHeight, false, m_uiMaxWidth >> (m_uhTotalDepth - 1)  );
+  data.tempCU->create( uiNumPartitions, uiWidth, uiHeight, false, m_uiMaxWidth >> (m_uhTotalDepth - 1) );
   data.predYuvBest->create(uiWidth, uiHeight);
   data.resiYuvBest->create(uiWidth, uiHeight);
   data.recoYuvBest->create(uiWidth, uiHeight);
@@ -514,6 +517,7 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
   TComYuv*& resiYuvTemp = data.resiYuvTemp;
   TComYuv*& recoYuvTemp = data.recoYuvTemp; */
 
+//  printf("1 %d: %p %p\n",(int)uiDepth, bestCU, tempCU);
   TComPic* pcPic = bestCU->getPic();
 
   // get Original YUV data from picture
@@ -898,6 +902,7 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
     iMaxQP  = Clip3( MIN_QP, MAX_QP, qp);
   }
 #endif
+
   for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
   {
     if (isAddLowestQP && (iQP == iMinQP))
@@ -913,9 +918,10 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
 //      TComDataCU* pcSubBestPartCU     = m_ppcBestCU[uhNextDepth];
 //      TComDataCU* pcSubTempPartCU     = m_ppcTempCU[uhNextDepth];
 /////////////////////////////////////////////////////////////////////////////
-      DATA subData;
+      DATA subData, subData2;
 
       create_DATA(subData, uhNextDepth);
+      create_DATA(subData2, uhNextDepth);
 /*      TComDataCU pcSubBestPartCU;
       TComDataCU pcSubTempPartCU;
 
@@ -939,23 +945,24 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
 //      m_pppcRDSbacCoder[uhNextDepth][CI_CURR_BEST]->load(m_pppcRDSbacCoder[uiDepth][CI_CURR_BEST]);
 
 
-      xCompressCUPart(search, data, subData, pcSlice, 0, iQP, uiDepth, uhNextDepth, sbac1);
-
-      xCompressCUPart(search, data, subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
-
+      xCompressCUPart(search, &data, &subData, pcSlice, 0, iQP, uiDepth, uhNextDepth, sbac1);
       // init TEncSearch
       TEncSearch search2;
       init_predSearch(&search2);
       search2.copySearch(search, pcSlice);
 
-      xCompressCUPart(&search2, data, subData, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
-
-      search->copySearch(&search2, pcSlice);
-      //cilk_sync;
-      xCompressCUPart(search, data, subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);
+      //printf("depth: %d new spawn\n", uiDepth);
+      xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
+      xCompressCUPart(&search2, &data, &subData2, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
+      // cilk_sync;
+      //printf("depth: %d spawn synced\n", uiDepth);
+//      search->copySearch(&search2, pcSlice);
+//      cilk_sync;
+      xCompressCUPart(search, &data, &subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);
       // done
 
-      destroy_DATA(subData);
+//      destroy_DATA(subData);
+//      destroy_DATA(subData2);
       delete sbac1;
       delete cabac1;
       sbac1 = NULL;
@@ -1042,6 +1049,9 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
   bestCU->copyToPic(uiDepth);                                                     // Copy Best data to Picture for next partition prediction.
 
   xCopyYuv2Pic( bestCU->getPic(), bestCU->getAddr(), bestCU->getZorderIdxInCU(), uiDepth, uiDepth, bestCU, uiLPelX, uiTPelY, data );   // Copy Yuv data to picture Yuv
+
+//  printf("9 %d: %p %p\n",(int)uiDepth, bestCU, tempCU);
+
   if( bBoundary ||(bSliceEnd && bInsidePicture))
   {
     return;

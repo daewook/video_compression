@@ -2373,6 +2373,8 @@ TEncSearch::xSetIntraResultChromaQT( TComDataCU* pcCU,
 Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice) {
   m_pcEntropyCoder = new TEncEntropy;
   m_pcEntropyCoder->setEntropyCoder (m_pcRDGoOnSbacCoder, pcSlice);
+  TComBitCounter* counter = new TComBitCounter;
+  m_pcEntropyCoder->setBitstream(counter);
 }
 
 Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* previousCoder) {
@@ -2385,7 +2387,7 @@ Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* previousCoder) {
 
   RDGoOnSbacCoder->load(previousCoder);
 
-//  m_pcRDGoOnSbacCoder = RDGoOnSbacCoder;
+  m_pcRDGoOnSbacCoder = RDGoOnSbacCoder;
 }
 
 Void TEncSearch::copyRDSbacCoder(TEncSbac*** previousCoder) {

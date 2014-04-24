@@ -45,6 +45,7 @@
 #include "TLibCommon/TComPrediction.h"
 #include "TLibCommon/TComTrQuant.h"
 #include "TLibCommon/TComPic.h"
+#include "TLibCommon/TComBitCounter.h"
 #include "TEncEntropy.h"
 #include "TEncSbac.h"
 #include "TEncCfg.h"
