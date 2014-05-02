@@ -196,7 +196,9 @@ public:
   Int*    getSliceNSamples(){ return m_sliceNsamples ;} 
   Double* getSliceSumC()    { return m_sliceSumC; }
 #endif
-protected:
+
+  Void    copyTrQuant(TComTrQuant *trQuant);
+//protected:
 #if ADAPTIVE_QP_SELECTION
   Int     m_qpDelta[MAX_QP+1]; 
   Int     m_sliceNsamples[LEVEL_RANGE+1];  

@@ -2429,11 +2429,17 @@ Void TEncSearch::copyPcRdCost(TComRdCost* pcRdCost) {
   // TODO: copy m_mvPredPredictor?
 }
 
+Void TEncSearch::copyTrQuant(TComTrQuant* trQuant) {
+    m_pcTrQuant = new TComTrQuant;
+    m_pcTrQuant->copyTrQuant(trQuant);
+}
+
 Void TEncSearch::copySearch(TEncSearch *search, TComSlice *pcSlice) {
   copyRDGoOnSbacCoder(search->getRDGoOnSbacCoder());
   copyRDSbacCoder(search->getRDSbacCoder());
   copyPcRdCost(search->getPcRdCost());
   copyEntropyCoder(search->getEntropyCoder(), pcSlice);
+  copyTrQuant(search->getTrQuant());
 }
 
 Void 

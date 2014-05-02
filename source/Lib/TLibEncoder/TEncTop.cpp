@@ -275,6 +275,7 @@ Void TEncTop::destroy ()
 
 Void TEncTop::init_TEncSearch(TEncSearch *search) {
   search->init( this, &m_cTrQuant, m_iSearchRange, m_bipredSearchRange, m_iFastSearch, 0, &m_cEntropyCoder, &m_cRdCost, getRDSbacCoder(), getRDGoOnSbacCoder() );
+//  search->init( this, trQuant, m_iSearchRange, m_bipredSearchRange, m_iFastSearch, 0, &m_cEntropyCoder, &m_cRdCost, getRDSbacCoder(), getRDGoOnSbacCoder() );
 }
 
 Void TEncTop::init(Bool isFieldCoding)
