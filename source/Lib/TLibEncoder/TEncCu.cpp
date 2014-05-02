@@ -263,8 +263,12 @@ Void TEncCu::compressCU( TEncSlice* slice, TComDataCU*& rpcCU )
   TEncSearch m_cSearch;
   init_predSearch(&m_cSearch);
 
+  data.dQPFlag = getdQPFlag();
+
   // xCompressCU( m_ppcBestCU[0], m_ppcTempCU[0], 0, sbac );
   xCompressCU( &m_cSearch, data, 0, sbac );
+
+  setdQPFlag(data.dQPFlag);
 
 
 #if ADAPTIVE_QP_SELECTION
@@ -461,6 +465,8 @@ Void TEncCu::create_DATA(DATA& data, UInt depth) {
   data.resiYuvTemp->create(uiWidth, uiHeight);
   data.recoYuvTemp->create(uiWidth, uiHeight);
   data.origYuv->create(uiWidth, uiHeight);
+
+  data.dQPFlag = false;
 }
 
 Void TEncCu::destroy_DATA(DATA& data) {
@@ -922,6 +928,9 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
 
       create_DATA(subData, uhNextDepth);
       create_DATA(subData2, uhNextDepth);
+
+      subData.dQPFlag = data.dQPFlag;
+      subData2.dQPFlag = data.dQPFlag;
 /*      TComDataCU pcSubBestPartCU;
       TComDataCU pcSubTempPartCU;
 
@@ -961,6 +970,7 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       xCompressCUPart(search, &data, &subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);
       // done
 
+      data.dQPFlag = subData.dQPFlag;
 //      destroy_DATA(subData);
 //      destroy_DATA(subData2);
       delete sbac1;
@@ -1607,9 +1617,10 @@ Void TEncCu::xCheckRDCostIntra( TEncSearch *search, DATA &data, PartSize eSize )
   search->getEntropyCoder()->encodeIPCMInfo(data.tempCU, 0, true );
 
   // Encode Coefficients
-  Bool bCodeDQP = getdQPFlag();
-  search->getEntropyCoder()->encodeCoeff( data.tempCU, 0, uiDepth, data.tempCU->getWidth (0), data.tempCU->getHeight(0), bCodeDQP );
-  setdQPFlag( bCodeDQP );
+  //Bool bCodeDQP = data.dQPFlag;
+  //Bool bCodeDQP = getdQPFlag();
+  search->getEntropyCoder()->encodeCoeff( data.tempCU, 0, uiDepth, data.tempCU->getWidth (0), data.tempCU->getHeight(0), data.dQPFlag );
+  //setdQPFlag( bCodeDQP );
   
   if( m_bUseSBACRD ) search->getRDGoOnSbacCoder()->store(search->getRDSbacCoder()[uiDepth][CI_TEMP_BEST]);
   

@@ -75,6 +75,8 @@ class TEncCu
     TComYuv*    resiYuvTemp; ///< Temporary Residual Yuv for each depth
     TComYuv*    recoYuvTemp; ///< Temporary Reconstruction Yuv for each depth
     TComYuv*    origYuv;     ///< Original Yuv for each depth
+
+    Bool dQPFlag;
   };
   typedef struct DATA DATA;
 
