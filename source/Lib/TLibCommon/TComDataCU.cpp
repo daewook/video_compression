@@ -111,6 +111,8 @@ TComDataCU::TComDataCU()
   m_bDecSubCu          = false;
   m_sliceStartCU        = 0;
   m_sliceSegmentStartCU = 0;
+
+  pthread_mutex_init(&lock, NULL);
 }
 
 TComDataCU::~TComDataCU()
@@ -307,6 +309,8 @@ Void TComDataCU::destroy()
     xFree(m_sliceSegmentStartCU);
     m_sliceSegmentStartCU=NULL;
   }
+
+  pthread_mutex_destroy(&lock);
 }
 
 const NDBFBlockInfo& NDBFBlockInfo::operator= (const NDBFBlockInfo& src)
@@ -903,10 +907,12 @@ Void TComDataCU::copyInterPredInfoFrom    ( TComDataCU* pcCU, UInt uiAbsPartIdx,
 Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDepth )
 {
   assert( uiPartUnitIdx<4 );
-  
+ 
+  pthread_mutex_lock(&lock);
   m_dTotalCost         += pcCU->getTotalCost();
   m_uiTotalDistortion  += pcCU->getTotalDistortion();
   m_uiTotalBits        += pcCU->getTotalBits();
+  pthread_mutex_unlock(&lock);
   
   UInt uiOffset         = pcCU->getTotalNumPart()*uiPartUnitIdx;
   
@@ -973,7 +979,9 @@ Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDept
 #endif
   memcpy( m_pcIPCMSampleCb + uiTmp2 , pcCU->getPCMSampleCb(), sizeof(Pel) * uiTmp );
   memcpy( m_pcIPCMSampleCr + uiTmp2 , pcCU->getPCMSampleCr(), sizeof(Pel) * uiTmp );
+  pthread_mutex_lock(&lock);
   m_uiTotalBins += pcCU->getTotalBins();
+  pthread_mutex_unlock(&lock);
   memcpy( m_sliceStartCU        + uiOffset, pcCU->m_sliceStartCU,        sizeof( UInt ) * uiNumPartition  );
   memcpy( m_sliceSegmentStartCU + uiOffset, pcCU->m_sliceSegmentStartCU, sizeof( UInt ) * uiNumPartition  );
 }
