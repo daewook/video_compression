@@ -51,6 +51,43 @@ Int * TComDataCU::m_pcGlbArlCoeffCr = NULL;
 // ====================================================================================================================
 // Constructor / destructor / create / destroy
 // ====================================================================================================================
+#include <execinfo.h>
+void print_trace (void) {
+  void *array[10];
+  size_t size;
+  char **messages;
+  size_t i;
+     
+  size = backtrace (array, 10);
+  messages = backtrace_symbols (array, size);
+     
+  printf("[bt] Execution path:\n");
+  for (i=1; i<size; ++i)
+  {
+    printf("[bt] #%d %s\n", (int)i, messages[i]);
+
+    char syscom[256];
+    printf("addr2line %p -e sighandler", array[i]); //last parameter is the name of this app
+//    system(syscom);
+  }
+     
+//  free (strings);
+}
+
+int cnt = 0;
+void *memcpy(void *v_dst, const void *v_src, size_t c){
+  //print_trace();
+  //printf("%d\n",cnt++);
+  
+  const char *src = (const char *)v_src;
+  char *dst = (char *)v_dst;
+
+  /* Simple, byte oriented memcpy. */
+  while (c--)
+    *dst++ = *src++;
+
+  return v_dst;
+}
 
 TComDataCU::TComDataCU()
 {
@@ -979,9 +1016,11 @@ Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDept
 #endif
   memcpy( m_pcIPCMSampleCb + uiTmp2 , pcCU->getPCMSampleCb(), sizeof(Pel) * uiTmp );
   memcpy( m_pcIPCMSampleCr + uiTmp2 , pcCU->getPCMSampleCr(), sizeof(Pel) * uiTmp );
+
   pthread_mutex_lock(&lock);
   m_uiTotalBins += pcCU->getTotalBins();
   pthread_mutex_unlock(&lock);
+
   memcpy( m_sliceStartCU        + uiOffset, pcCU->m_sliceStartCU,        sizeof( UInt ) * uiNumPartition  );
   memcpy( m_sliceSegmentStartCU + uiOffset, pcCU->m_sliceSegmentStartCU, sizeof( UInt ) * uiNumPartition  );
 }
@@ -991,10 +1030,12 @@ Void TComDataCU::copyPartFrom( TComDataCU* pcCU, UInt uiPartUnitIdx, UInt uiDept
 Void TComDataCU::copyToPic( UChar uhDepth )
 {
   TComDataCU*& rpcCU = m_pcPic->getCU( m_uiCUAddr );
-  
+ 
+  pthread_mutex_lock(&(rpcCU->lock));
   rpcCU->getTotalCost()       = m_dTotalCost;
   rpcCU->getTotalDistortion() = m_uiTotalDistortion;
   rpcCU->getTotalBits()       = m_uiTotalBits;
+  pthread_mutex_unlock(&(rpcCU->lock));
   
   Int iSizeInUchar  = sizeof( UChar ) * m_uiNumPartition;
   Int iSizeInBool   = sizeof( Bool  ) * m_uiNumPartition;
@@ -1053,7 +1094,11 @@ Void TComDataCU::copyToPic( UChar uhDepth )
 #endif
   memcpy( rpcCU->getPCMSampleCb() + uiTmp2 , m_pcIPCMSampleCb, sizeof( Pel ) * uiTmp );
   memcpy( rpcCU->getPCMSampleCr() + uiTmp2 , m_pcIPCMSampleCr, sizeof( Pel ) * uiTmp );
+
+  pthread_mutex_lock(&(rpcCU->lock));
   rpcCU->getTotalBins() = m_uiTotalBins;
+  pthread_mutex_unlock(&(rpcCU->lock));
+
   memcpy( rpcCU->m_sliceStartCU        + m_uiAbsIdxInLCU, m_sliceStartCU,        sizeof( UInt ) * m_uiNumPartition  );
   memcpy( rpcCU->m_sliceSegmentStartCU + m_uiAbsIdxInLCU, m_sliceSegmentStartCU, sizeof( UInt ) * m_uiNumPartition  );
 }
@@ -1065,10 +1110,12 @@ Void TComDataCU::copyToPic( UChar uhDepth, UInt uiPartIdx, UInt uiPartDepth )
   
   UInt uiPartStart          = uiPartIdx*uiQNumPart;
   UInt uiPartOffset         = m_uiAbsIdxInLCU + uiPartStart;
-  
+ 
+  pthread_mutex_lock(&(rpcCU->lock));
   rpcCU->getTotalCost()       = m_dTotalCost;
   rpcCU->getTotalDistortion() = m_uiTotalDistortion;
   rpcCU->getTotalBits()       = m_uiTotalBits;
+  pthread_mutex_unlock(&(rpcCU->lock));
   
   Int iSizeInUchar  = sizeof( UChar  ) * uiQNumPart;
   Int iSizeInBool   = sizeof( Bool   ) * uiQNumPart;
@@ -1125,7 +1172,11 @@ Void TComDataCU::copyToPic( UChar uhDepth, UInt uiPartIdx, UInt uiPartDepth )
 
   memcpy( rpcCU->getPCMSampleCb() + uiTmp2 , m_pcIPCMSampleCb, sizeof( Pel ) * uiTmp );
   memcpy( rpcCU->getPCMSampleCr() + uiTmp2 , m_pcIPCMSampleCr, sizeof( Pel ) * uiTmp );
+
+  pthread_mutex_lock(&(rpcCU->lock));
   rpcCU->getTotalBins() = m_uiTotalBins;
+  pthread_mutex_unlock(&(rpcCU->lock));
+
   memcpy( rpcCU->m_sliceStartCU        + uiPartOffset, m_sliceStartCU,        sizeof( UInt ) * uiQNumPart  );
   memcpy( rpcCU->m_sliceSegmentStartCU + uiPartOffset, m_sliceSegmentStartCU, sizeof( UInt ) * uiQNumPart  );
 }

@@ -102,7 +102,6 @@ class TComDataCU
 {
 private:
  
-  pthread_mutex_t lock;
   // -------------------------------------------------------------------------------------------------------------------
   // class pointers
   // -------------------------------------------------------------------------------------------------------------------
@@ -511,6 +510,8 @@ public:
   // member functions for RD cost storage
   // -------------------------------------------------------------------------------------------------------------------
   
+  pthread_mutex_t lock;
+
   Double&       getTotalCost()                  { return m_dTotalCost;        }
   UInt&         getTotalDistortion()            { return m_uiTotalDistortion; }
   UInt&         getTotalBits()                  { return m_uiTotalBits;       }

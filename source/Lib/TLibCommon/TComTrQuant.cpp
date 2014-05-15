@@ -1398,7 +1398,7 @@ Void TComTrQuant::xT(Int bitDepth, UInt uiMode, Pel* piBlkResi, UInt uiStride, I
   Short coeff[ 32 * 32 ];
   for (j = 0; j < iHeight; j++)
   {    
-    memcpy( block + j * iWidth, piBlkResi + j * uiStride, iWidth * sizeof( Short ) );
+    memcpy1( block + j * iWidth, piBlkResi + j * uiStride, iWidth * sizeof( Short ) );
   }
   xTrMxN(bitDepth, block, coeff, iWidth, iHeight, uiMode );
   for ( j = 0; j < iHeight * iWidth; j++ )
