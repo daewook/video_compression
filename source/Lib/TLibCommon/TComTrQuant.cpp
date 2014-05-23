@@ -66,6 +66,20 @@ typedef struct
 
 // RDOQ parameter
 
+static void *memcpy2(void *v_dst, const void *v_src, size_t c){
+  //print_trace();
+  //printf("%d\n",cnt++);
+    
+  const char *src = (const char *)v_src;
+  char *dst = (char *)v_dst;
+
+  /* Simple, byte oriented memcpy21. */
+  while (c--)
+    *dst++ = *src++;
+
+  return v_dst;
+}
+
 // ====================================================================================================================
 // Qp class member functions
 // ====================================================================================================================
@@ -109,15 +123,15 @@ TComTrQuant::~TComTrQuant()
 
 Void TComTrQuant::copyTrQuant(TComTrQuant *trQuant) {
 #if ADAPTIVE_QP_SELECTION
-  memcpy(m_qpDelta, trQuant->m_qpDelta, sizeof(Int) * (MAX_QP+1));
-  memcpy(m_sliceNsamples, trQuant->m_sliceNsamples, sizeof(Int) * (LEVEL_RANGE+1)); 
-  memcpy(m_sliceSumC, trQuant->m_sliceSumC, sizeof(Double) * (LEVEL_RANGE+1));
+  memcpy2(m_qpDelta, trQuant->m_qpDelta, sizeof(Int) * (MAX_QP+1));
+  memcpy2(m_sliceNsamples, trQuant->m_sliceNsamples, sizeof(Int) * (LEVEL_RANGE+1)); 
+  memcpy2(m_sliceSumC, trQuant->m_sliceSumC, sizeof(Double) * (LEVEL_RANGE+1));
 #endif
   for (UInt i = 0; i < MAX_CU_SIZE*MAX_CU_SIZE; i++) {
     m_plTempCoeff[i] = trQuant->m_plTempCoeff[i];
   }
 
-  memcpy(m_pcEstBitsSbac, trQuant->m_pcEstBitsSbac, sizeof(estBitsSbacStruct));
+  memcpy2(m_pcEstBitsSbac, trQuant->m_pcEstBitsSbac, sizeof(estBitsSbacStruct));
   
   m_cQP.m_iQP = trQuant->m_cQP.m_iQP;
   m_cQP.m_iPer = trQuant->m_cQP.m_iPer;
@@ -1398,7 +1412,7 @@ Void TComTrQuant::xT(Int bitDepth, UInt uiMode, Pel* piBlkResi, UInt uiStride, I
   Short coeff[ 32 * 32 ];
   for (j = 0; j < iHeight; j++)
   {    
-    memcpy1( block + j * iWidth, piBlkResi + j * uiStride, iWidth * sizeof( Short ) );
+    memcpy2( block + j * iWidth, piBlkResi + j * uiStride, iWidth * sizeof( Short ) );
   }
   xTrMxN(bitDepth, block, coeff, iWidth, iHeight, uiMode );
   for ( j = 0; j < iHeight * iWidth; j++ )
@@ -1434,7 +1448,7 @@ Void TComTrQuant::xIT(Int bitDepth, UInt uiMode, Int* plCoef, Pel* pResidual, UI
     {
       for ( j = 0; j < iHeight; j++ )
       {    
-        memcpy( pResidual + j * uiStride, block + j * iWidth, iWidth * sizeof(Short) );
+        memcpy2( pResidual + j * uiStride, block + j * iWidth, iWidth * sizeof(Short) );
       }
     }
     return ;

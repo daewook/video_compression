@@ -43,6 +43,19 @@
 
 //! \ingroup TLibCommon
 //! \{
+void *memcpy6(void *v_dst, const void *v_src, size_t c){
+    //print_trace();
+    //printf("%d\n",cnt++);
+    
+    const char *src = (const char *)v_src;
+      char *dst = (char *)v_dst;
+
+        /* Simple, byte oriented memcpy61. */
+        while (c--)
+              *dst++ = *src++;
+
+          return v_dst;
+}
 
 TComSlice::TComSlice()
 : m_iPPSId                        ( -1 )
@@ -727,7 +740,7 @@ Void TComSlice::copySliceInfo(TComSlice *pSrc)
   {
     for ( Int n=0 ; n<MAX_NUM_REF ; n++ )
     {
-      memcpy(m_weightPredTable[e][n], pSrc->m_weightPredTable[e][n], sizeof(wpScalingParam)*3 );
+      memcpy6(m_weightPredTable[e][n], pSrc->m_weightPredTable[e][n], sizeof(wpScalingParam)*3 );
     }
   }
   m_saoEnabledFlag = pSrc->m_saoEnabledFlag; 
@@ -1867,7 +1880,7 @@ Bool TComSlice::checkDefaultScalingList()
  */
 Void TComScalingList::processRefMatrix( UInt sizeId, UInt listId , UInt refListId )
 {
-  ::memcpy(getScalingListAddress(sizeId, listId),((listId == refListId)? getScalingListDefaultAddress(sizeId, refListId): getScalingListAddress(sizeId, refListId)),sizeof(Int)*min(MAX_MATRIX_COEF_NUM,(Int)g_scalingListSize[sizeId]));
+  ::memcpy6(getScalingListAddress(sizeId, listId),((listId == refListId)? getScalingListDefaultAddress(sizeId, refListId): getScalingListAddress(sizeId, refListId)),sizeof(Int)*min(MAX_MATRIX_COEF_NUM,(Int)g_scalingListSize[sizeId]));
 }
 
 /** parse syntax infomation 
@@ -2012,7 +2025,7 @@ Int* TComScalingList::getScalingListDefaultAddress(UInt sizeId, UInt listId)
  */
 Void TComScalingList::processDefaultMarix(UInt sizeId, UInt listId)
 {
-  ::memcpy(getScalingListAddress(sizeId, listId),getScalingListDefaultAddress(sizeId,listId),sizeof(Int)*min(MAX_MATRIX_COEF_NUM,(Int)g_scalingListSize[sizeId]));
+  ::memcpy6(getScalingListAddress(sizeId, listId),getScalingListDefaultAddress(sizeId,listId),sizeof(Int)*min(MAX_MATRIX_COEF_NUM,(Int)g_scalingListSize[sizeId]));
   setScalingListDC(sizeId,listId,SCALING_LIST_DC);
 }
 

@@ -960,12 +960,12 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       init_predSearch(&search2);
       search2.copySearch(search, pcSlice);
 
-      //printf("depth: %d new spawn\n", uiDepth);
+//      printf("depth: %d new spawn\n", uiDepth);
       cilk_spawn xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
       xCompressCUPart(&search2, &data, &subData2, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
       cilk_sync;
 
-      //printf("depth: %d spawn synced\n", uiDepth);
+//      printf("depth: %d spawn synced\n", uiDepth);
 //      search->copySearch(&search2, pcSlice);
 //      cilk_sync;
       xCompressCUPart(search, &data, &subData, pcSlice, 3, iQP, uiDepth, uhNextDepth, sbac1);

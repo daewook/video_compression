@@ -47,6 +47,19 @@
 
 //! \ingroup TLibCommon
 //! \{
+void *memcpy5(void *v_dst, const void *v_src, size_t c){
+    //print_trace();
+    //printf("%d\n",cnt++);
+    
+    const char *src = (const char *)v_src;
+      char *dst = (char *)v_dst;
+
+        /* Simple, byte oriented memcpy1. */
+        while (c--)
+              *dst++ = *src++;
+
+          return v_dst;
+}
 
 TComYuv::TComYuv()
 {
@@ -108,7 +121,7 @@ Void TComYuv::copyToPicLuma  ( TComPicYuv* pcPicYuvDst, UInt iCuAddr, UInt uiAbs
   
   for ( y = iHeight; y != 0; y-- )
   {
-    ::memcpy( pDst, pSrc, sizeof(Pel)*iWidth);
+    ::memcpy5( pDst, pSrc, sizeof(Pel)*iWidth);
     pDst += iDstStride;
     pSrc += iSrcStride;
   }
@@ -129,8 +142,8 @@ Void TComYuv::copyToPicChroma( TComPicYuv* pcPicYuvDst, UInt iCuAddr, UInt uiAbs
   UInt  iDstStride = pcPicYuvDst->getCStride();
   for ( y = iHeight; y != 0; y-- )
   {
-    ::memcpy( pDstU, pSrcU, sizeof(Pel)*(iWidth) );
-    ::memcpy( pDstV, pSrcV, sizeof(Pel)*(iWidth) );
+    ::memcpy5( pDstU, pSrcU, sizeof(Pel)*(iWidth) );
+    ::memcpy5( pDstV, pSrcV, sizeof(Pel)*(iWidth) );
     pSrcU += iSrcStride;
     pSrcV += iSrcStride;
     pDstU += iDstStride;

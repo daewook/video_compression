@@ -424,7 +424,8 @@ Void TComPattern::fillReferenceSamples(Int bitDepth, Pel* piRoiOrigin, Int* piAd
     piRoiTemp = piRoiOrigin - iPicStride + uiCuWidth;
     for (i=0; i<uiCuWidth; i++)
     {
-      piAdiTemp[1+uiCuWidth+i] = piRoiTemp[i];
+//      piAdiTemp[1+uiCuWidth+i] = piRoiTemp[i];
+      piAdiTemp[1+uiCuWidth+i] = iDCValue;
     }
   }
   else // reference samples are partially available
@@ -482,6 +483,7 @@ Void TComPattern::fillReferenceSamples(Int bitDepth, Pel* piRoiOrigin, Int* piAd
     piRoiTemp = piRoiOrigin - iPicStride;
     piAdiLineTemp = piAdiLine + ((iNumUnits2+1)*iUnitSize);
     pbNeighborFlags = bNeighborFlags + iNumUnits2 + 1;
+    int cnt = 0; // to only fill above samples NOT ABOVE-RIGHT
     for (j=0; j<iNumUnits2; j++)
     {
       if (*pbNeighborFlags)
@@ -490,6 +492,10 @@ Void TComPattern::fillReferenceSamples(Int bitDepth, Pel* piRoiOrigin, Int* piAd
         {
           piAdiLineTemp[i] = piRoiTemp[i];
         }
+      }
+      cnt += iUnitSize;
+      if (cnt + iUnitSize >= uiCuWidth) {
+        break;
       }
       piRoiTemp += iUnitSize;
       piAdiLineTemp += iUnitSize;

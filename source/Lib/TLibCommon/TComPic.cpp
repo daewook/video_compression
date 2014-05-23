@@ -45,6 +45,20 @@
 // Constructor / destructor / create / destroy
 // ====================================================================================================================
 
+void *memcpy4(void *v_dst, const void *v_src, size_t c){
+    //print_trace();
+    //printf("%d\n",cnt++);
+    
+    const char *src = (const char *)v_src;
+      char *dst = (char *)v_dst;
+
+        /* Simple, byte oriented memcpy41. */
+        while (c--)
+              *dst++ = *src++;
+
+          return v_dst;
+}
+
 TComPic::TComPic()
 : m_uiTLayer                              (0)
 , m_bUsedByCurr                           (false)
@@ -96,7 +110,7 @@ Void TComPic::create( Int iWidth, Int iHeight, UInt uiMaxWidth, UInt uiMaxHeight
   m_defaultDisplayWindow = defaultDisplayWindow;
 
   /* store number of reorder pics with picture */
-  memcpy(m_numReorderPics, numReorderPics, MAX_TLAYER*sizeof(Int));
+  memcpy4(m_numReorderPics, numReorderPics, MAX_TLAYER*sizeof(Int));
 
   return;
 }
