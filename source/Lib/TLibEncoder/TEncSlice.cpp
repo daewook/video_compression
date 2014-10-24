@@ -801,12 +801,9 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
-Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, UInt iNumSubstreams, TEncSbac**** ppppcRDSbacCoders, TComSlice* pcSlice, TComBitCounter* pcBitCounters, TEncBinCABAC* pppcRDSbacCoder)
+Void TEncSlice::processTile(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, UInt iNumSubstreams, TEncSbac**** ppppcRDSbacCoders, TComSlice* pcSlice, TComBitCounter* pcBitCounters, TEncBinCABAC* pppcRDSbacCoder, UInt tileNumber)
 {
   UInt uiCol=0, uiLin=0, uiSubStrm=0;
-  UInt uiTileCol      = 0;
-  UInt uiTileStartLCU = 0;
-  UInt uiTileLCUX     = 0;
 
   // initialize CU encoder
   TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
@@ -815,9 +812,6 @@ Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, U
   // inherit from TR if necessary, select substream to use.
   if( m_pcCfg->getUseSBACRD() )
   {
-    uiTileCol = rpcPic->getPicSym()->getTileIdxMap(uiCUAddr) % (rpcPic->getPicSym()->getNumColumnsMinus1()+1); // what column of tiles are we in?
-    uiTileStartLCU = rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr();
-    uiTileLCUX = uiTileStartLCU % uiWidthInLCUs;
     //UInt uiSliceStartLCU = pcSlice->getSliceCurStartCUAddr();
     uiCol     = uiCUAddr % uiWidthInLCUs;
     uiLin     = uiCUAddr / uiWidthInLCUs;
@@ -825,7 +819,6 @@ Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, U
       // dependent tiles => substreams are "per frame".
       uiSubStrm = uiLin % iNumSubstreams;
     }
-    m_pppcRDSbacCoder[0][CI_CURR_BEST]->load( ppppcRDSbacCoders[uiSubStrm][0][CI_CURR_BEST] ); //this load is used to simplify the code
   }
 
   // reset the entropy coder
@@ -840,7 +833,7 @@ Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, U
       sliceType = (SliceType) pcSlice->getPPS()->getEncCABACTableIdx();
     }
     m_pcEntropyCoder->updateContextTables ( sliceType, pcSlice->getSliceQp(), false );
-    m_pcEntropyCoder->setEntropyCoder     ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
+    //m_pcEntropyCoder->setEntropyCoder     ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
     m_pcEntropyCoder->updateContextTables ( sliceType, pcSlice->getSliceQp() );
     //m_pcEntropyCoder->setEntropyCoder     ( m_pcSbacCoder, pcSlice );
   }
@@ -867,16 +860,7 @@ Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, U
     m_pcCuEncoder->encodeCU( pcCU );
 
     pppcRDSbacCoder->setBinCountingEnableFlag( false );
-    if (m_pcCfg->getSliceMode()==FIXED_NUMBER_OF_BYTES && ( ( pcSlice->getSliceBits() + m_pcEntropyCoder->getNumberOfWrittenBits() ) ) > m_pcCfg->getSliceArgument()<<3)
-    {
-      pcSlice->setNextSlice( true );
-      return false;
-    }
-    if (m_pcCfg->getSliceSegmentMode()==FIXED_NUMBER_OF_BYTES && pcSlice->getSliceSegmentBits()+m_pcEntropyCoder->getNumberOfWrittenBits() > (m_pcCfg->getSliceSegmentArgument() << 3) &&pcSlice->getSliceCurEndCUAddr()!=pcSlice->getSliceSegmentCurEndCUAddr())
-    {
-      pcSlice->setNextSliceSegment( true );
-      return false;
-    }
+
     if( m_pcCfg->getUseSBACRD() )
     {
        ppppcRDSbacCoders[uiSubStrm][0][CI_CURR_BEST]->load( m_pppcRDSbacCoder[0][CI_CURR_BEST] );
@@ -886,8 +870,6 @@ Bool TEncSlice::processCU(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, U
   m_uiPicTotalBits += pcCU->getTotalBits();
   m_dPicRdCost     += pcCU->getTotalCost();
   m_uiPicDist      += pcCU->getTotalDistortion();
-
-  return true;
 }
 
 Void TEncSlice::compressSlice( TComPic*& rpcPic )
@@ -1053,10 +1035,9 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
        uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU();
        uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
-    if( !processCU(uiCUAddr, rpcPic, uiWidthInLCUs, iNumSubstreams, ppppcRDSbacCoders, pcSlice, pcBitCounters, pppcRDSbacCoder) )
-    {
-      break;
-    }
+    UInt tileNumber = 0;
+    
+    processTile(uiCUAddr, rpcPic, uiWidthInLCUs, iNumSubstreams, ppppcRDSbacCoders, pcSlice, pcBitCounters, pppcRDSbacCoder, tileNumber);
   }
 
   if ((pcSlice->getPPS()->getNumSubstreams() > 1) && !depSliceSegmentsEnabled)
