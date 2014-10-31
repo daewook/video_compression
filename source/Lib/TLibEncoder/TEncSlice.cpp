@@ -38,6 +38,7 @@
 #include "TEncTop.h"
 #include "TEncSlice.h"
 #include <math.h>
+#include <pthread.h>
 
 //! \ingroup TLibEncoder
 //! \{
@@ -801,75 +802,82 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
-Void TEncSlice::processTile(UInt uiCUAddr, TComPic*& rpcPic, UInt uiWidthInLCUs, UInt iNumSubstreams, TEncSbac**** ppppcRDSbacCoders, TComSlice* pcSlice, TComBitCounter* pcBitCounters, TEncBinCABAC* pppcRDSbacCoder, UInt tileNumber)
+TComBitCounter bitCounter;
+Void TEncSlice::processTile(UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiWidthInLCUs, UInt iNumSubstreams, UInt uiBoundingCUAddr, TEncSbac**** ppppcRDSbacCoders, TComSlice* pcSlice, TComBitCounter* bitCounter1, TEncBinCABAC* pppcRDSbacCoder, pthread_mutex_t &lock)
 {
   UInt uiCol=0, uiLin=0, uiSubStrm=0;
+  UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
 
-  // initialize CU encoder
-  TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
-  pcCU->initCU( rpcPic, uiCUAddr );
+/*  TEncEntropy entropyCoder;
+  TEncCu cuEncoder;
+  TComBitCounter bitCounter;
+  TEncSbac rdSbacCoder;
 
-  // inherit from TR if necessary, select substream to use.
-  if( m_pcCfg->getUseSBACRD() )
+  cuEncoder.init(*/
+
+  //TComBitCounter bitCounter;
+  bitCounter.resetBits();
+
+  UInt uiPicTotalBits = 0;
+  UInt dPicRdCost = 0;
+  UInt uiPicDist = 0;
+ 
+  bool first = true;
+  for( ; uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU() &&
+         (first || uiCUAddr != rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr())
+       ; uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
-    //UInt uiSliceStartLCU = pcSlice->getSliceCurStartCUAddr();
-    uiCol     = uiCUAddr % uiWidthInLCUs;
-    uiLin     = uiCUAddr / uiWidthInLCUs;
-    {
-      // dependent tiles => substreams are "per frame".
-      uiSubStrm = uiLin % iNumSubstreams;
-    }
-  }
+    // initialize CU encoder
+    TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
+    pcCU->initCU( rpcPic, uiCUAddr );
 
-  // reset the entropy coder
-  if( uiCUAddr == rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr() &&                                   // must be first CU of tile
-      uiCUAddr!=0 &&                                                                                                                                    // cannot be first CU of picture
-      uiCUAddr!=rpcPic->getPicSym()->getPicSCUAddr(rpcPic->getSlice(rpcPic->getCurrSliceIdx())->getSliceSegmentCurStartCUAddr())/rpcPic->getNumPartInCU() &&
-      uiCUAddr!=rpcPic->getPicSym()->getPicSCUAddr(rpcPic->getSlice(rpcPic->getCurrSliceIdx())->getSliceCurStartCUAddr())/rpcPic->getNumPartInCU())     // cannot be first CU of slice
-  {
-    SliceType sliceType = pcSlice->getSliceType();
-    if (!pcSlice->isIntra() && pcSlice->getPPS()->getCabacInitPresentFlag() && pcSlice->getPPS()->getEncCABACTableIdx()!=I_SLICE)
-    {
-      sliceType = (SliceType) pcSlice->getPPS()->getEncCABACTableIdx();
-    }
-    m_pcEntropyCoder->updateContextTables ( sliceType, pcSlice->getSliceQp(), false );
-    //m_pcEntropyCoder->setEntropyCoder     ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
-    m_pcEntropyCoder->updateContextTables ( sliceType, pcSlice->getSliceQp() );
-    //m_pcEntropyCoder->setEntropyCoder     ( m_pcSbacCoder, pcSlice );
-  }
-  // if RD based on SBAC is used
-  if( m_pcCfg->getUseSBACRD() )
-  {
-    // set go-on entropy coder
-    m_pcEntropyCoder->setEntropyCoder ( m_pcRDGoOnSbacCoder, pcSlice );
-    m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );
-    
-    ((TEncBinCABAC*)m_pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
-
-    // run CU encoder
-    m_pcCuEncoder->compressCU( pcCU );
-
-    // restore entropy coder to an initial stage
-    m_pcEntropyCoder->setEntropyCoder ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
-    m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );
-    m_pcCuEncoder->setBitCounter( &pcBitCounters[uiSubStrm] );
-    m_pcBitCounter = &pcBitCounters[uiSubStrm];
-    pppcRDSbacCoder->setBinCountingEnableFlag( true );
-    m_pcBitCounter->resetBits();
-    pppcRDSbacCoder->setBinsCoded( 0 );
-    m_pcCuEncoder->encodeCU( pcCU );
-
-    pppcRDSbacCoder->setBinCountingEnableFlag( false );
-
+    // inherit from TR if necessary, select substream to use.
     if( m_pcCfg->getUseSBACRD() )
     {
-       ppppcRDSbacCoders[uiSubStrm][0][CI_CURR_BEST]->load( m_pppcRDSbacCoder[0][CI_CURR_BEST] );
+      //UInt uiSliceStartLCU = pcSlice->getSliceCurStartCUAddr();
+      uiCol     = uiCUAddr % uiWidthInLCUs;
+      uiLin     = uiCUAddr / uiWidthInLCUs;
+      {
+        // dependent tiles => substreams are "per frame".
+        uiSubStrm = uiLin % iNumSubstreams;
+      }
     }
+
+    // if RD based on SBAC is used
+    if( m_pcCfg->getUseSBACRD() )
+    {
+      // set go-on entropy coder
+      m_pcEntropyCoder->setEntropyCoder ( m_pcRDGoOnSbacCoder, pcSlice );
+      if (first) {
+        first = false;
+        m_pcEntropyCoder->resetEntropy();
+      }
+      
+      m_pcEntropyCoder->setBitstream( &bitCounter );
+      
+      ((TEncBinCABAC*)m_pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
+
+      // run CU encoder
+      m_pcCuEncoder->compressCU( pcCU );
+
+      // restore entropy coder to an initial stage
+      m_pcEntropyCoder->setEntropyCoder ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
+      m_pcEntropyCoder->setBitstream( &bitCounter );
+      pppcRDSbacCoder->setBinCountingEnableFlag( true );
+      pppcRDSbacCoder->setBinsCoded( 0 );
+      m_pcCuEncoder->encodeCU( pcCU );
+    }
+   
+    uiPicTotalBits += pcCU->getTotalBits();
+    dPicRdCost     += pcCU->getTotalCost();
+    uiPicDist      += pcCU->getTotalDistortion();
   }
- 
-  m_uiPicTotalBits += pcCU->getTotalBits();
-  m_dPicRdCost     += pcCU->getTotalCost();
-  m_uiPicDist      += pcCU->getTotalDistortion();
+
+  pthread_mutex_lock(&lock);
+  m_uiPicTotalBits += uiPicTotalBits;
+  m_dPicRdCost     += dPicRdCost;
+  m_uiPicDist      += uiPicDist;
+  pthread_mutex_unlock(&lock);
 }
 
 Void TEncSlice::compressSlice( TComPic*& rpcPic )
@@ -1030,15 +1038,29 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     }
   }
   // for every CU in slice
+  pthread_mutex_t lock;
   UInt uiEncCUOrder;
+
+  pthread_mutex_init(&lock, NULL);
   for( uiEncCUOrder = uiStartCUAddr/rpcPic->getNumPartInCU();
        uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU();
        uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
-    UInt tileNumber = 0;
-    
-    processTile(uiCUAddr, rpcPic, uiWidthInLCUs, iNumSubstreams, ppppcRDSbacCoders, pcSlice, pcBitCounters, pppcRDSbacCoder, tileNumber);
+    if( uiCUAddr == rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr())                                    // must be first CU of tile
+    { 
+      //TEncEntropy newEntropy;
+      //m_pcEntropyCoder = &newEntropy;
+      m_pcEntropyCoder->resetEntropy();
+      TComBitCounter bitCounter;
+      //printf("start\n");
+      processTile(uiEncCUOrder, rpcPic, uiWidthInLCUs, iNumSubstreams, uiBoundingCUAddr, ppppcRDSbacCoders, pcSlice, &bitCounter, pppcRDSbacCoder, lock);
+      //printf("end\n");
+    }
   }
+
+  m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );
+  //cilk_sync;
+  pthread_mutex_destroy(&lock);
 
   if ((pcSlice->getPPS()->getNumSubstreams() > 1) && !depSliceSegmentsEnabled)
   {
