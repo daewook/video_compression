@@ -802,25 +802,27 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
-TComBitCounter bitCounter;
+TComBitCounter bitCounter[9];
+int cntcnt = 0;
+
 Void TEncSlice::processTile(UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiWidthInLCUs, UInt iNumSubstreams, UInt uiBoundingCUAddr, TEncSbac**** ppppcRDSbacCoders, TComSlice* pcSlice, TComBitCounter* bitCounter1, TEncBinCABAC* pppcRDSbacCoder, pthread_mutex_t &lock)
 {
   UInt uiCol=0, uiLin=0, uiSubStrm=0;
   UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
 
-/*  TEncEntropy entropyCoder;
-  TEncCu cuEncoder;
-  TComBitCounter bitCounter;
-  TEncSbac rdSbacCoder;
-
-  cuEncoder.init(*/
-
-  //TComBitCounter bitCounter;
-  bitCounter.resetBits();
+  bitCounter[cntcnt].resetBits();
 
   UInt uiPicTotalBits = 0;
   UInt dPicRdCost = 0;
   UInt uiPicDist = 0;
+
+  /**/
+  TEncTop* pcEncTop = (TEncTop*) m_pcCfg;
+  TEncCu cuEncoder;
+  cuEncoder.create(g_uiMaxCUDepth, g_uiMaxCUWidth, g_uiMaxCUHeight);
+  cuEncoder.init(pcEncTop);
+
+  /**/
  
   bool first = true;
   for( ; uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU() &&
@@ -853,7 +855,7 @@ Void TEncSlice::processTile(UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiWidthInL
         m_pcEntropyCoder->resetEntropy();
       }
       
-      m_pcEntropyCoder->setBitstream( &bitCounter );
+      m_pcEntropyCoder->setBitstream( &bitCounter[cntcnt] );
       
       ((TEncBinCABAC*)m_pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
 
@@ -862,7 +864,7 @@ Void TEncSlice::processTile(UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiWidthInL
 
       // restore entropy coder to an initial stage
       m_pcEntropyCoder->setEntropyCoder ( m_pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
-      m_pcEntropyCoder->setBitstream( &bitCounter );
+      m_pcEntropyCoder->setBitstream( &bitCounter[cntcnt] );
       pppcRDSbacCoder->setBinCountingEnableFlag( true );
       pppcRDSbacCoder->setBinsCoded( 0 );
       m_pcCuEncoder->encodeCU( pcCU );
@@ -1052,9 +1054,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
       //m_pcEntropyCoder = &newEntropy;
       m_pcEntropyCoder->resetEntropy();
       TComBitCounter bitCounter;
-      //printf("start\n");
       processTile(uiEncCUOrder, rpcPic, uiWidthInLCUs, iNumSubstreams, uiBoundingCUAddr, ppppcRDSbacCoders, pcSlice, &bitCounter, pppcRDSbacCoder, lock);
-      //printf("end\n");
     }
   }
 
