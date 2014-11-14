@@ -206,7 +206,6 @@ Void TEncCu::destroy()
 Void TEncCu::init( TEncTop* pcEncTop )
 {
   m_pcEncCfg           = pcEncTop;
-  m_pcPredSearch       = pcEncTop->getPredSearch();
   m_pcTrQuant          = pcEncTop->getTrQuant(); // doesn't need to be parallelized
   m_pcBitCounter       = pcEncTop->getBitCounter();  // doesn't need to be parallelized
   m_pcRdCost           = pcEncTop->getRdCost(); // doesn't need to be parallelized
@@ -215,6 +214,7 @@ Void TEncCu::init( TEncTop* pcEncTop )
  
   m_pppcRDSbacCoder   = pcEncTop->getRDSbacCoder();
   m_pcRDGoOnSbacCoder = pcEncTop->getRDGoOnSbacCoder();
+  m_pcPredSearch      = pcEncTop->getPredSearch();
   
   m_bUseSBACRD        = pcEncTop->getUseSBACRD();
   m_pcRateCtrl        = pcEncTop->getRateCtrl();
