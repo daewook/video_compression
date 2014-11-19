@@ -203,19 +203,42 @@ Void TEncCu::destroy()
 
 /** \param    pcEncTop      pointer of encoder class
  */
-Void TEncCu::init( TEncTop* pcEncTop )
+Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncSbac* pcRDGoOnSbacCoder )
 {
   m_pcEncCfg           = pcEncTop;
   m_pcTrQuant          = pcEncTop->getTrQuant(); // doesn't need to be parallelized
   m_pcBitCounter       = pcEncTop->getBitCounter();  // doesn't need to be parallelized
   m_pcRdCost           = pcEncTop->getRdCost(); // doesn't need to be parallelized
+
+  m_pppcRDSbacCoder   = pppcRDSbacCoder;
+  m_pcRDGoOnSbacCoder = pcRDGoOnSbacCoder;
+
+  m_pcEntropyCoder = entropyCoder;
+  m_pcPredSearch      = new TEncSearch;
+  m_pcPredSearch->init(pcEncTop, m_pcTrQuant, pcEncTop->getSearchRange(), pcEncTop->getBipredSearchRange(), pcEncTop->getFastSearch(), 0, m_pcEntropyCoder, m_pcRdCost, m_pppcRDSbacCoder, m_pcRDGoOnSbacCoder);
   
+  m_bUseSBACRD        = pcEncTop->getUseSBACRD();
+  m_pcRateCtrl        = pcEncTop->getRateCtrl();
+}
+
+/** \param    pcEncTop      pointer of encoder class
+   */
+Void TEncCu::init( TEncTop* pcEncTop )
+{
+  m_pcEncCfg           = pcEncTop;
+  m_pcPredSearch       = pcEncTop->getPredSearch();
+  m_pcTrQuant          = pcEncTop->getTrQuant();
+  m_pcBitCounter       = pcEncTop->getBitCounter();
+  m_pcRdCost           = pcEncTop->getRdCost();
+
   m_pcEntropyCoder     = pcEncTop->getEntropyCoder();
- 
+  m_pcCavlcCoder       = pcEncTop->getCavlcCoder();
+  m_pcSbacCoder       = pcEncTop->getSbacCoder();
+  m_pcBinCABAC         = pcEncTop->getBinCABAC();
+
   m_pppcRDSbacCoder   = pcEncTop->getRDSbacCoder();
   m_pcRDGoOnSbacCoder = pcEncTop->getRDGoOnSbacCoder();
-  m_pcPredSearch      = pcEncTop->getPredSearch();
-  
+
   m_bUseSBACRD        = pcEncTop->getUseSBACRD();
   m_pcRateCtrl        = pcEncTop->getRateCtrl();
 }

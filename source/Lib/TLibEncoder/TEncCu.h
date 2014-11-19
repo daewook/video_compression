@@ -106,6 +106,9 @@ private:
 public:
   /// copy parameters from encoder class
   Void  init                ( TEncTop* pcEncTop );
+
+  /// init with all new objects
+  Void  init_new            ( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncSbac* pcRDGoOnSbacCoder );
   
   /// create internal buffers
   Void  create              ( UChar uhTotalDepth, UInt iMaxWidth, UInt iMaxHeight );
@@ -118,6 +121,9 @@ public:
   
   /// CU encoding function
   Void  encodeCU            ( TComDataCU*    pcCU );
+
+  TEncEntropy* getEntropyCoder () { return m_pcEntropyCoder; }
+  Void setEntropyCoder (TEncEntropy* entropyCoder) { m_pcEntropyCoder = entropyCoder; }
   
   Void setBitCounter        ( TComBitCounter* pcBitCounter ) { m_pcBitCounter = pcBitCounter; }
 #if RATE_CONTROL_LAMBDA_DOMAIN && !M0036_RC_IMPROVEMENT
