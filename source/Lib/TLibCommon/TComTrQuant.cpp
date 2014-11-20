@@ -1201,6 +1201,63 @@ Void TComTrQuant::init( UInt uiMaxTrSize,
   m_useTransformSkipFast = useTransformSkipFast;
 }
 
+Void TComTrQuant::copyInit (TComTrQuant* trQuant) {
+  m_uiMaxTrSize  = trQuant->getUiMaxTrSize();
+  m_bEnc         = trQuant->getBEnc();
+  m_useRDOQ     = trQuant->getUseRDOQ();
+  m_useRDOQTS     = trQuant->getBUseRDOQTS();
+#if ADAPTIVE_QP_SELECTION
+  m_bUseAdaptQpSelect = trQuant->getBUseAdaptQpSelect();
+#endif
+  m_useTransformSkipFast = trQuant->getUseTransformSkipFast();
+}
+
+Void TComTrQuant::copyTrQuant(TComTrQuant *trQuant) {
+#if ADAPTIVE_QP_SELECTION
+  memcpy(m_qpDelta, trQuant->m_qpDelta, sizeof(Int) * (MAX_QP+1));
+  memcpy(m_sliceNsamples, trQuant->m_sliceNsamples, sizeof(Int) * (LEVEL_RANGE+1)); 
+  memcpy(m_sliceSumC, trQuant->m_sliceSumC, sizeof(Double) * (LEVEL_RANGE+1));
+#endif
+  for (UInt i = 0; i < MAX_CU_SIZE*MAX_CU_SIZE; i++) {
+    m_plTempCoeff[i] = trQuant->m_plTempCoeff[i];
+  }
+
+  memcpy(m_pcEstBitsSbac, trQuant->m_pcEstBitsSbac, sizeof(estBitsSbacStruct));
+  
+  m_cQP.m_iQP = trQuant->m_cQP.m_iQP;
+  m_cQP.m_iPer = trQuant->m_cQP.m_iPer;
+  m_cQP.m_iRem = trQuant->m_cQP.m_iRem;
+  m_cQP.m_iBits = trQuant->m_cQP.m_iBits;
+
+#if RDOQ_CHROMA_LAMBDA
+  m_dLambdaLuma = trQuant->m_dLambdaLuma;
+  m_dLambdaChroma = trQuant->m_dLambdaChroma;
+#endif
+  m_dLambda = trQuant->m_dLambda;
+  m_uiRDOQOffset = trQuant->m_uiRDOQOffset;
+  m_uiMaxTrSize = trQuant->m_uiMaxTrSize;
+  m_bEnc = trQuant->m_bEnc;
+  m_useRDOQ = trQuant->m_useRDOQ;
+  m_useRDOQTS = trQuant->m_useRDOQTS;
+#if ADAPTIVE_QP_SELECTION
+  m_bUseAdaptQpSelect = trQuant->m_bUseAdaptQpSelect;
+#endif
+  m_useTransformSkipFast = trQuant->m_useTransformSkipFast;
+  m_scalingListEnabledFlag = trQuant->m_scalingListEnabledFlag;
+
+  for (UInt i = 0; i < SCALING_LIST_SIZE_NUM; i++) {
+    for (UInt j = 0; j < g_scalingListNum[i]; j++) {
+      for (UInt k = 0; k < SCALING_LIST_REM_NUM; k++) {
+       for (UInt l = 0; l < g_scalingListSize[i]; l++) {
+          m_quantCoef[i][j][k][l] = trQuant->m_quantCoef[i][j][k][l];
+          m_dequantCoef[i][j][k][l] = trQuant->m_dequantCoef[i][j][k][l];
+          m_errScale[i][j][k][l] = trQuant->m_errScale[i][j][k][l];
+        }    
+      }    
+    }    
+  }
+}
+
 Void TComTrQuant::transformNxN( TComDataCU* pcCU, 
                                Pel*        pcResidual, 
                                UInt        uiStride, 

@@ -205,10 +205,16 @@ Void TEncCu::destroy()
  */
 Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncSbac* pcRDGoOnSbacCoder )
 {
-  m_pcEncCfg           = pcEncTop;
-  m_pcTrQuant          = pcEncTop->getTrQuant(); // doesn't need to be parallelized
-  m_pcBitCounter       = pcEncTop->getBitCounter();  // doesn't need to be parallelized
-  m_pcRdCost           = pcEncTop->getRdCost(); // doesn't need to be parallelized
+  m_pcEncCfg          = pcEncTop;
+//  m_pcTrQuant         = pcEncTop->getTrQuant();
+  m_pcTrQuant         = new TComTrQuant;
+  m_pcTrQuant->copyTrQuant(pcEncTop->getTrQuant());
+
+  m_pcBitCounter      = pcEncTop->getBitCounter(); 
+  m_pcBitCounter      = new TComBitCounter;
+
+  m_pcRdCost          = pcEncTop->getRdCost();
+//  m_pcRdCost          = new TComRdCost;
 
   m_pppcRDSbacCoder   = pppcRDSbacCoder;
   m_pcRDGoOnSbacCoder = pcRDGoOnSbacCoder;

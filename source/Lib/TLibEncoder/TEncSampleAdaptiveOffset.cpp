@@ -675,6 +675,9 @@ Void TEncSampleAdaptiveOffset::startSaoEnc( TComPic* pcPic, TEncEntropy* pcEntro
   m_pcRDGoOnSbacCoder = pcRDGoOnSbacCoder;
   m_pcEntropyCoder->setEntropyCoder(m_pcRDGoOnSbacCoder, pcPic->getSlice(0));
   m_pcEntropyCoder->resetEntropy();
+  TComBitCounter* bitCounter = new TComBitCounter;  //////////////////////////////////here
+  bitCounter->resetBits();
+  m_pcEntropyCoder->setBitstream(bitCounter);
   m_pcEntropyCoder->resetBits();
 
   if( m_bUseSBACRD )

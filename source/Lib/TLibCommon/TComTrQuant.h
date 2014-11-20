@@ -125,6 +125,10 @@ public:
     , Bool bUseAdaptQpSelect = false
 #endif 
     );
+
+  Void copyInit (TComTrQuant* trQuant);
+
+  Void copyTrQuant (TComTrQuant* trQuant);
   
   // transform & inverse transform functions
   Void transformNxN( TComDataCU* pcCU, 
@@ -155,10 +159,19 @@ public:
   Void setLambda(Double dLambda) { m_dLambda = dLambda;}
 #endif
   Void setRDOQOffset( UInt uiRDOQOffset ) { m_uiRDOQOffset = uiRDOQOffset; }
+
+  UInt getUiMaxTrSize() { return m_uiMaxTrSize; }
+  Bool getBEnc() { return m_bEnc; }
+  Bool getUseRDOQ() { return m_useRDOQ; }
+  Bool getBUseRDOQTS() { return m_useRDOQTS; }
+#if ADAPTIVE_QP_SELECTION      
+  Bool getBUseAdaptQpSelect() { return m_bUseAdaptQpSelect; }
+#endif
+  Bool getUseTransformSkipFast() { return m_useTransformSkipFast; }
   
   estBitsSbacStruct* m_pcEstBitsSbac;
-  
-  static Int      calcPatternSigCtx( const UInt* sigCoeffGroupFlag, UInt posXCG, UInt posYCG, Int width, Int height );
+
+ static Int      calcPatternSigCtx( const UInt* sigCoeffGroupFlag, UInt posXCG, UInt posYCG, Int width, Int height );
 
   static Int      getSigCtxInc     (
                                      Int                             patternSigCtx,
@@ -196,7 +209,7 @@ public:
   Int*    getSliceNSamples(){ return m_sliceNsamples ;} 
   Double* getSliceSumC()    { return m_sliceSumC; }
 #endif
-protected:
+//protected:
 #if ADAPTIVE_QP_SELECTION
   Int     m_qpDelta[MAX_QP+1]; 
   Int     m_sliceNsamples[LEVEL_RANGE+1];  
