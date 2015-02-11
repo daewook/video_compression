@@ -1218,10 +1218,12 @@ Void TComTrQuant::copyTrQuant(TComTrQuant *trQuant) {
   memcpy(m_sliceNsamples, trQuant->m_sliceNsamples, sizeof(Int) * (LEVEL_RANGE+1)); 
   memcpy(m_sliceSumC, trQuant->m_sliceSumC, sizeof(Double) * (LEVEL_RANGE+1));
 #endif
+  m_plTempCoeff = new Int[MAX_CU_SIZE*MAX_CU_SIZE];
   for (UInt i = 0; i < MAX_CU_SIZE*MAX_CU_SIZE; i++) {
     m_plTempCoeff[i] = trQuant->m_plTempCoeff[i];
   }
 
+  m_pcEstBitsSbac = new estBitsSbacStruct;
   memcpy(m_pcEstBitsSbac, trQuant->m_pcEstBitsSbac, sizeof(estBitsSbacStruct));
   
   m_cQP.m_iQP = trQuant->m_cQP.m_iQP;

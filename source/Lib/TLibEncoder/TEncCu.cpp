@@ -102,12 +102,12 @@ Void TEncCu::create(UChar uhTotalDepth, UInt uiMaxWidth, UInt uiMaxHeight)
 #endif
 
   // initialize partition order.
-  UInt* piTmp = &g_auiZscanToRaster[0];
+/*  UInt* piTmp = &g_auiZscanToRaster[0];
   initZscanToRaster( m_uhTotalDepth, 1, 0, piTmp);
   initRasterToZscan( uiMaxWidth, uiMaxHeight, m_uhTotalDepth );
   
   // initialize conversion matrix from partition index to pel
-  initRasterToPelXY( uiMaxWidth, uiMaxHeight, m_uhTotalDepth );
+  initRasterToPelXY( uiMaxWidth, uiMaxHeight, m_uhTotalDepth );*/
 }
 
 Void TEncCu::destroy()
@@ -208,6 +208,7 @@ Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac***
   m_pcEncCfg          = pcEncTop;
 //  m_pcTrQuant         = pcEncTop->getTrQuant();
   m_pcTrQuant         = new TComTrQuant;
+  m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
   m_pcTrQuant->copyTrQuant(pcEncTop->getTrQuant());
 
   m_pcBitCounter      = pcEncTop->getBitCounter(); 
