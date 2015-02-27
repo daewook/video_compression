@@ -33,7 +33,7 @@ OBJS          		= 	\
 # set libs to link with
 LIBS				= -ldl
 
-DEBUG_LIBS			= -lrt -lcilkprof
+DEBUG_LIBS			= #-lrt -lcilkprof
 RELEASE_LIBS		=
 
 STAT_LIBS			= -lpthread
