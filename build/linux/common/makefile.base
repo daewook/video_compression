@@ -59,7 +59,7 @@ endif
 
 #
 # debug cpp flags
-DEBUG_CPPFLAGS    = -g -O2 -D_DEBUG -L /scratch/daewook/cilktools/lib -fcilktool-instr-c -lcilkprof -lrt -fcilkplus -ldl -gdwarf-3
+DEBUG_CPPFLAGS    = -g -O2 -D_DEBUG -L /scratch/daewook/cilktools/lib -fcilktool-instr-c -lcilkprof -l:libcilkrts.a -lrt -fcilkplus -ldl -gdwarf-3
 #DEBUG_CPPFLAGS    = -g  -D_DEBUG -fcilkplus -ldl -gdwarf-3
 #
 # release cpp
