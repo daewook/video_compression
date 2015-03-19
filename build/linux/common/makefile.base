@@ -12,7 +12,7 @@ endif
 # executables used
 #########################################################
 
-CPP   	= clang++
+CPP   	= icpc
 AR    	= ar
 LD    	= $(CPP)
 ASM		= nasm

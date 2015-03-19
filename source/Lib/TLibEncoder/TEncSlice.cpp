@@ -854,6 +854,7 @@ Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPi
          (first || uiCUAddr != rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr())
        ; uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
+    //printf("uiEncCUOrder: %d\n", uiEncCUOrder);
     TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
     pcCU->initCU( rpcPic, uiCUAddr );
 
@@ -1020,6 +1021,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   }
 
   cilk_for (UInt i = 0; i < numTiles; i++) {
+    //printf("tileID: %d\n", i);
     processTile(bitCounters[i], tile_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice, lock);
   }
 
