@@ -1171,6 +1171,7 @@ TComDataCU* TComDataCU::getPUAbove( UInt& uiAPartUnitIdx,
   UInt uiAbsPartIdx       = g_auiZscanToRaster[uiCurrPartUnitIdx];
   UInt uiAbsZorderCUIdx   = g_auiZscanToRaster[m_uiAbsIdxInLCU];
   UInt uiNumPartInCUWidth = m_pcPic->getNumPartInWidth();
+//  printf("getPUAbove: uiAPartUnitIdx: %d, uiCurrPartUnitIdx: %d, uiAbsPartIdx: %d, uiAbsZorderCUIdx: %d\n", (int)uiAPartUnitIdx, (int)uiCurrPartUnitIdx, (int)uiAbsPartIdx, (int)uiAbsZorderCUIdx);
   
   if ( !RasterAddress::isZeroRow( uiAbsPartIdx, uiNumPartInCUWidth ) )
   {
