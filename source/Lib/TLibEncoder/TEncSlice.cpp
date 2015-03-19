@@ -41,6 +41,7 @@
 #include <pthread.h>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
+#include <cilk/reducer_opadd.h>
 
 //! \ingroup TLibEncoder
 //! \{
@@ -886,11 +887,12 @@ Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPi
     uiPicDist      += pcCU->getTotalDistortion();
   }
 
-  pthread_mutex_lock(&lock);
+  // Not used
+/*  pthread_mutex_lock(&lock);
   m_uiPicTotalBits += uiPicTotalBits;
   m_dPicRdCost     += dPicRdCost;
   m_uiPicDist      += uiPicDist;
-  pthread_mutex_unlock(&lock);
+  pthread_mutex_unlock(&lock);*/
 
   // free
 //  cuEncoder.destroy();
@@ -1008,7 +1010,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   bitCounters = new TComBitCounter[numTiles];
   tile_uiEncCUOrders = new UInt[numTiles];
 
-  pthread_mutex_init(&lock, NULL);
+//  pthread_mutex_init(&lock, NULL);
   for( uiEncCUOrder = uiStartCUAddr/rpcPic->getNumPartInCU();
        uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU();
        uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
@@ -1030,7 +1032,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
 
   //cilk_sync;
   m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );
-  pthread_mutex_destroy(&lock);
+//  pthread_mutex_destroy(&lock);
 
   if ((pcSlice->getPPS()->getNumSubstreams() > 1) && !depSliceSegmentsEnabled)
   {
