@@ -81,7 +81,7 @@ QpParam::QpParam()
 TComTrQuant::TComTrQuant()
 {
   m_cQP.clear();
-  
+ 
   // allocate temporary buffers
   m_plTempCoeff  = new Int[ MAX_CU_SIZE*MAX_CU_SIZE ];
   
@@ -788,7 +788,7 @@ void xTrMxN(Int bitDepth, Short *block,Short *coeff, Int iWidth, Int iHeight, UI
   Int shift_1st = g_aucConvertToBit[iWidth]  + 1 + bitDepth-8; // log2(iWidth) - 1 + g_bitDepth - 8
   Int shift_2nd = g_aucConvertToBit[iHeight]  + 8;                   // log2(iHeight) + 6
 
-  Short tmp[ 64 * 64 ];
+  Short* tmp = new Short[ 64 * 64 ];
 
   if( iWidth == 4 && iHeight == 4)
   {
@@ -819,6 +819,7 @@ void xTrMxN(Int bitDepth, Short *block,Short *coeff, Int iWidth, Int iHeight, UI
     partialButterfly32( block, tmp, shift_1st, iHeight );
     partialButterfly32( tmp, coeff, shift_2nd, iWidth );
   }
+  delete[] tmp;
 }
 /** MxN inverse transform (2D)
 *  \param coeff input data (transform coefficients)
@@ -831,7 +832,8 @@ void xITrMxN(Int bitDepth, Short *coeff,Short *block, Int iWidth, Int iHeight, U
   Int shift_1st = SHIFT_INV_1ST;
   Int shift_2nd = SHIFT_INV_2ND - (bitDepth-8);
 
-  Short tmp[ 64*64];
+  Short* tmp = new Short[ 64 * 64 ];
+
   if( iWidth == 4 && iHeight == 4)
   {
     if (uiMode != REG_DCT)
@@ -860,6 +862,8 @@ void xITrMxN(Int bitDepth, Short *coeff,Short *block, Int iWidth, Int iHeight, U
     partialButterflyInverse32(coeff,tmp,shift_1st,iWidth);
     partialButterflyInverse32(tmp,block,shift_2nd,iHeight);
   }
+
+  delete[] tmp;
 }
 
 #endif //MATRIX_MULT
@@ -1218,7 +1222,6 @@ Void TComTrQuant::copyTrQuant(TComTrQuant *trQuant) {
   memcpy(m_sliceNsamples, trQuant->m_sliceNsamples, sizeof(Int) * (LEVEL_RANGE+1)); 
   memcpy(m_sliceSumC, trQuant->m_sliceSumC, sizeof(Double) * (LEVEL_RANGE+1));
 #endif
-  m_plTempCoeff = new Int[MAX_CU_SIZE*MAX_CU_SIZE];
   for (UInt i = 0; i < MAX_CU_SIZE*MAX_CU_SIZE; i++) {
     m_plTempCoeff[i] = trQuant->m_plTempCoeff[i];
   }
@@ -1582,16 +1585,25 @@ Void TComTrQuant::xRateDistOptQuant                 ( TComDataCU*               
 #if ADAPTIVE_QP_SELECTION
   memset(piArlDstCoeff, 0, sizeof(Int) *  uiMaxNumCoeff);
 #endif
-  
-  Double pdCostCoeff [ 32 * 32 ];
-  Double pdCostSig   [ 32 * 32 ];
-  Double pdCostCoeff0[ 32 * 32 ];
+  Double* pdCostCoeff = new Double[ 32 * 32 ];
+  Double* pdCostSig = new Double[ 32 * 32 ];
+  Double* pdCostCoeff0 = new Double[ 32 * 32 ];
+  Int* rateIncUp   = new Int[ 32 * 32 ];
+  Int* rateIncDown = new Int[ 32 * 32 ];
+  Int* sigRateDelta= new Int[ 32 * 32 ];
+  Int* deltaU      = new Int[ 32 * 32 ];
+ 
+
+
+  //Double pdCostCoeff [ 32 * 32 ];
+  //Double pdCostSig   [ 32 * 32 ];
+  //Double pdCostCoeff0[ 32 * 32 ];
   ::memset( pdCostCoeff, 0, sizeof(Double) *  uiMaxNumCoeff );
   ::memset( pdCostSig,   0, sizeof(Double) *  uiMaxNumCoeff );
-  Int rateIncUp   [ 32 * 32 ];
-  Int rateIncDown [ 32 * 32 ];
-  Int sigRateDelta[ 32 * 32 ];
-  Int deltaU      [ 32 * 32 ];
+  //Int rateIncUp   [ 32 * 32 ];
+  //Int rateIncDown [ 32 * 32 ];
+  //Int sigRateDelta[ 32 * 32 ];
+  //Int deltaU      [ 32 * 32 ];
   ::memset( rateIncUp,    0, sizeof(Int) *  uiMaxNumCoeff );
   ::memset( rateIncDown,  0, sizeof(Int) *  uiMaxNumCoeff );
   ::memset( sigRateDelta, 0, sizeof(Int) *  uiMaxNumCoeff );
@@ -2055,6 +2067,15 @@ Void TComTrQuant::xRateDistOptQuant                 ( TComDataCU*               
       }
     }
   }
+
+  delete[] pdCostCoeff;
+  delete[] pdCostSig;
+  delete[] pdCostCoeff0;
+  delete[] rateIncUp;
+  delete[] rateIncDown;
+  delete[] sigRateDelta;
+  delete[] deltaU;
+ 
 }
 
 /** Pattern decision for context derivation process of significant_coeff_flag

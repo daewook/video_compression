@@ -55,6 +55,38 @@ TComRdCost::~TComRdCost()
 #endif
 }
 
+Void TComRdCost::copy(TComRdCost* rdCost) {
+#if AMP_SAD
+  memcpy(m_afpDistortFunc, rdCost->m_afpDistortFunc, 64 * sizeof(FpDistFunc)); // [eDFunc]
+#else
+  memcpy(m_afpDistortFunc, rdCost->m_afpDistortFunc, 33 * sizeof(FpDistFunc)); // [eDFunc]
+#endif
+
+#if WEIGHTED_CHROMA_DISTORTION
+  m_cbDistortionWeight = rdCost->m_cbDistortionWeight;
+  m_crDistortionWeight = rdCost->m_crDistortionWeight;
+#endif
+  m_dLambda = rdCost->m_dLambda;
+  m_sqrtLambda = rdCost->m_sqrtLambda;
+  m_uiLambdaMotionSAD = rdCost->m_uiLambdaMotionSAD;
+  m_uiLambdaMotionSSE = rdCost->m_uiLambdaMotionSSE;
+  m_dFrameLambda = rdCost->m_dFrameLambda;
+
+#if FIX203
+  m_mvPredictor.copy(&(rdCost->m_mvPredictor));
+#else
+  m_puiComponentCostOriginP = NULL;
+  m_puiComponentCost = NULL;
+  m_puiVerCost = NULL;
+  m_puiHorCost = NULL;
+#endif
+  m_uiCost = rdCost->m_uiCost;
+  m_iCostScale = rdCost->m_iCostScale;
+#if !FIX203
+  m_iSearchLimit = rdCost->m_iSearchLimit;
+#endif
+}
+
 // Calculate RD functions
 Double TComRdCost::calcRdCost( UInt uiBits, UInt uiDistortion, Bool bFlag, DFunc eDFunc )
 {

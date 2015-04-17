@@ -171,7 +171,7 @@ public:
   
   estBitsSbacStruct* m_pcEstBitsSbac;
 
- static Int      calcPatternSigCtx( const UInt* sigCoeffGroupFlag, UInt posXCG, UInt posYCG, Int width, Int height );
+  static Int      calcPatternSigCtx( const UInt* sigCoeffGroupFlag, UInt posXCG, UInt posYCG, Int width, Int height );
 
   static Int      getSigCtxInc     (
                                      Int                             patternSigCtx,

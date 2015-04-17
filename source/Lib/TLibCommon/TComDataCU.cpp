@@ -1135,7 +1135,8 @@ TComDataCU* TComDataCU::getPULeft( UInt& uiLPartUnitIdx,
   UInt uiAbsZorderCUIdx   = g_auiZscanToRaster[m_uiAbsIdxInLCU];
   UInt uiNumPartInCUWidth = m_pcPic->getNumPartInWidth();
 
- // printf("getPUAbove: uiCurrPartUnitIdx: %d, uiAbsPartIdx: %d, uiAbsZorderCUIdx: %d\n", (int)uiCurrPartUnitIdx, (int)uiAbsPartIdx, (int)uiAbsZorderCUIdx);
+//  printf("Z getPUAbove: uiCurrPartUnitIdx: %d, uiAbsPartIdx: %d, uiAbsZorderCUIdx: %d\n", (int)uiCurrPartUnitIdx, (int)uiAbsPartIdx, (int)uiAbsZorderCUIdx);
+//  printf("R getPUAbove: uiAbsPartIdx: %d, uiAbsZorderCUIdx: %d, uiNumPartInCUWidth: %d\n", (int)uiAbsPartIdx, (int)uiAbsZorderCUIdx, (int)uiNumPartInCUWidth);
 
   if ( !RasterAddress::isZeroCol( uiAbsPartIdx, uiNumPartInCUWidth ) )
   {
@@ -1153,12 +1154,14 @@ TComDataCU* TComDataCU::getPULeft( UInt& uiLPartUnitIdx,
   
   uiLPartUnitIdx = g_auiRasterToZscan[ uiAbsPartIdx + uiNumPartInCUWidth - 1 ];
 
-
   if ( (bEnforceSliceRestriction && (m_pcCULeft==NULL || m_pcCULeft->getSlice()==NULL || m_pcCULeft->getSCUAddr()+uiLPartUnitIdx < m_pcPic->getCU( getAddr() )->getSliceStartCU(uiCurrPartUnitIdx)))
       ||
        (bEnforceTileRestriction && ( m_pcCULeft==NULL || m_pcCULeft->getSlice()==NULL || (m_pcPic->getPicSym()->getTileIdxMap( m_pcCULeft->getAddr() ) != m_pcPic->getPicSym()->getTileIdxMap(getAddr()))  )  )
       )
   {
+    //if (m_pcCULeft!= NULL && m_pcCULeft->getSlice() == NULL) {
+      //printf("WWWWWWWWWWWWWWWWTTTTTTTTTTTTTTTFFFFFFFFFFFFFF\n");
+   // }
     return NULL;
   }
   return m_pcCULeft;

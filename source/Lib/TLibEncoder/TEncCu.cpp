@@ -89,8 +89,7 @@ Void TEncCu::create(UChar uhTotalDepth, UInt uiMaxWidth, UInt uiMaxHeight)
     
     m_ppcPredYuvTemp[i] = new TComYuv; m_ppcPredYuvTemp[i]->create(uiWidth, uiHeight);
     m_ppcResiYuvTemp[i] = new TComYuv; m_ppcResiYuvTemp[i]->create(uiWidth, uiHeight);
-    m_ppcRecoYuvTemp[i] = new TComYuv; m_ppcRecoYuvTemp[i]->create(uiWidth, uiHeight);
-    
+    m_ppcRecoYuvTemp[i] = new TComYuv; m_ppcRecoYuvTemp[i]->create(uiWidth, uiHeight); 
     m_ppcOrigYuv    [i] = new TComYuv; m_ppcOrigYuv    [i]->create(uiWidth, uiHeight);
   }
   
@@ -208,13 +207,14 @@ Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac***
   m_pcEncCfg          = pcEncTop;
 //  m_pcTrQuant         = pcEncTop->getTrQuant();
   m_pcTrQuant         = new TComTrQuant;
-  m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
+//  m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
   m_pcTrQuant->copyTrQuant(pcEncTop->getTrQuant());
 
-  m_pcBitCounter      = pcEncTop->getBitCounter(); 
+//  m_pcBitCounter      = pcEncTop->getBitCounter(); 
   m_pcBitCounter      = new TComBitCounter;
 
-  m_pcRdCost          = pcEncTop->getRdCost();
+  m_pcRdCost          = new TComRdCost;
+  m_pcRdCost->copy(pcEncTop->getRdCost());
 //  m_pcRdCost          = new TComRdCost;
 
   m_pppcRDSbacCoder   = pppcRDSbacCoder;
@@ -458,6 +458,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
   {
     for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
     {
+//      if (uiDepth == 0)
+//        printf("dude: %d\n", iQP);
       if (isAddLowestQP && (iQP == iMinQP))
       {
         iQP = lowestQP;
@@ -1008,8 +1010,8 @@ Void TEncCu::finishCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   }
   if(granularityBoundary)
   {
-    pcSlice->setSliceBits( (UInt)(pcSlice->getSliceBits() + numberOfWrittenBits) );
-    pcSlice->setSliceSegmentBits(pcSlice->getSliceSegmentBits()+numberOfWrittenBits);
+//    pcSlice->setSliceBits( (UInt)(pcSlice->getSliceBits() + numberOfWrittenBits) );
+//    pcSlice->setSliceSegmentBits(pcSlice->getSliceSegmentBits()+numberOfWrittenBits);
     if (m_pcBitCounter)
     {
       m_pcEntropyCoder->resetBits();      

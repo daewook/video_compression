@@ -1107,7 +1107,7 @@ TEncSearch::xIntraCodingLumaBlk( TComDataCU* pcCU,
 #if RDOQ_CHROMA_LAMBDA 
   m_pcTrQuant->selectLambda     (TEXT_LUMA);  
 #endif
-
+//  printf("%p %p %p %p %p\n", (void *)pcCU, (void *)piResi, (void *)pcCoeff, (void *)pcArlCoeff, (void *)uiAbsSum);
   m_pcTrQuant->transformNxN     ( pcCU, piResi, uiStride, pcCoeff, 
 #if ADAPTIVE_QP_SELECTION
     pcArlCoeff, 

@@ -805,7 +805,7 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
-Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock)
+Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice)
 {
   UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
 
@@ -851,13 +851,15 @@ Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPi
   cuEncoder.init_new(pcEncTop, entropyCoder, pppcRDSbacCoder, pcRDGoOnSbacCoder);
 
   bool first = true;
+//  printf("here\n");
   for( ; uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU() &&
          (first || uiCUAddr != rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr())
        ; uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
-    //printf("uiEncCUOrder: %d\n", uiEncCUOrder);
+//    printf("%d %d | %d %d\n", uiEncCUOrder, (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU(), uiCUAddr, rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr());
+//    printf("B uiEncCUOrder, uiCUAddr: %d | %d\n", uiEncCUOrder, uiCUAddr);
     TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
-    pcCU->initCU( rpcPic, uiCUAddr );
+//    pcCU->initCU( rpcPic, uiCUAddr );
 
     // if RD based on SBAC is used
     if( m_pcCfg->getUseSBACRD() )
@@ -899,18 +901,18 @@ Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPi
 
   for (Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ ) {
     for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) {
-      free(pppcRDSbacCoder[iDepth][iCIIdx]);
-      free(pppcBinCoderCABAC[iDepth][iCIIdx]);
+      delete pppcRDSbacCoder[iDepth][iCIIdx];
+      delete pppcBinCoderCABAC[iDepth][iCIIdx];
     }
-    free(pppcRDSbacCoder[iDepth]);
-    free(pppcBinCoderCABAC[iDepth]);
+    delete[] pppcRDSbacCoder[iDepth];
+    delete[] pppcBinCoderCABAC[iDepth];
   }
-  free(pppcRDSbacCoder);
-  free(pppcBinCoderCABAC);
+  delete[] pppcRDSbacCoder;
+  delete[] pppcBinCoderCABAC;
 
-  free(entropyCoder);
-  free(sbacCoder);
-  free(binCABAC);
+  delete entropyCoder;
+  delete sbacCoder;
+  delete binCABAC;
 }
 
 Void TEncSlice::compressSlice( TComPic*& rpcPic )
@@ -1000,7 +1002,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   initRasterToPelXY( g_uiMaxCUWidth, g_uiMaxCUHeight, g_uiMaxCUDepth + 1 );
 
   // for every CU in slice
-  pthread_mutex_t lock;
+//  pthread_mutex_t lock;
   UInt uiEncCUOrder;
   Int tileNum = 0;
   UInt numTiles = (rpcPic->getPicSym()->getNumColumnsMinus1()+1) * (rpcPic->getPicSym()->getNumRowsMinus1()+1);
@@ -1022,13 +1024,20 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     }
   }
 
+  for(uiEncCUOrder = 0, uiCUAddr = 0 ; uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU(); uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
+  {
+//    printf("uiEncCUOrder, uiCUAddr: %d | %d\n", uiEncCUOrder, uiCUAddr);
+    TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
+    pcCU->initCU( rpcPic, uiCUAddr );
+  }
+
   cilk_for (UInt i = 0; i < numTiles; i++) {
     //printf("tileID: %d\n", i);
-    processTile(bitCounters[i], tile_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice, lock);
+    processTile(bitCounters[i], tile_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice);
   }
 
   //free(bitCounters);
-  free(tile_uiEncCUOrders);
+  delete[] tile_uiEncCUOrders;
 
   //cilk_sync;
   m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );

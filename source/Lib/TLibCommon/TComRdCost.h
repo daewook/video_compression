@@ -113,7 +113,7 @@ public:
 class TComRdCost
   : public TComRdCostWeightPrediction
 {
-private:
+public:
   // for distortion
   
 #if AMP_SAD
@@ -147,9 +147,11 @@ private:
   Int                     m_iSearchLimit;
 #endif
   
-public:
+//public:
   TComRdCost();
   virtual ~TComRdCost();
+
+  Void copy(TComRdCost* rdCost);
   
   Double  calcRdCost  ( UInt   uiBits, UInt   uiDistortion, Bool bFlag = false, DFunc eDFunc = DF_DEFAULT );
   Double  calcRdCost64( UInt64 uiBits, UInt64 uiDistortion, Bool bFlag = false, DFunc eDFunc = DF_DEFAULT );
