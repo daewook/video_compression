@@ -207,7 +207,7 @@ Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac***
   m_pcEncCfg          = pcEncTop;
 //  m_pcTrQuant         = pcEncTop->getTrQuant();
   m_pcTrQuant         = new TComTrQuant;
-//  m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
+  m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
   m_pcTrQuant->copyTrQuant(pcEncTop->getTrQuant());
 
 //  m_pcBitCounter      = pcEncTop->getBitCounter(); 
