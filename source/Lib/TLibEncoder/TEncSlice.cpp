@@ -897,7 +897,7 @@ Void TEncSlice::processTile(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPi
   pthread_mutex_unlock(&lock);*/
 
   // free
-//  cuEncoder.destroy();
+  cuEncoder.destroy();
 
   for (Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ ) {
     for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) {
@@ -1054,6 +1054,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     m_pcRateCtrl->updateFrameData(m_uiPicTotalBits);
   }
 #endif
+  delete[] bitCounters;
 }
 
 /**
