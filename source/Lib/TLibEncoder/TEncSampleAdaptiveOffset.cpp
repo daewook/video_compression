@@ -668,7 +668,7 @@ Void TEncSampleAdaptiveOffset::createEncBuffer()
  */
 Void TEncSampleAdaptiveOffset::startSaoEnc( TComPic* pcPic, TEncEntropy* pcEntropyCoder, TEncSbac*** pppcRDSbacCoder, TEncSbac* pcRDGoOnSbacCoder)
 {
-    m_bUseSBACRD = true;
+  m_bUseSBACRD = true;
   m_pcPic = pcPic;
   m_pcEntropyCoder = pcEntropyCoder;
 

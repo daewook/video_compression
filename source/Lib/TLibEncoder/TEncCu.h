@@ -115,6 +115,7 @@ public:
   
   /// destroy internal buffers
   Void  destroy             ();
+  Void  destroyWPP          ();
   
   /// CU analysis function
   Void  compressCU          ( TComDataCU*&  rpcCU );

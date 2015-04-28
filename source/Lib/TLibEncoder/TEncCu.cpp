@@ -201,6 +201,28 @@ Void TEncCu::destroy()
   }
 }
 
+Void TEncCu::destroyWPP() {
+  if (m_pcTrQuant) {
+    delete m_pcTrQuant;
+    m_pcTrQuant = NULL;
+  }
+        
+  if (m_pcBitCounter) {
+    delete m_pcBitCounter;
+    m_pcBitCounter = NULL;
+  }
+
+  if (m_pcRdCost) {
+    delete m_pcRdCost;
+    m_pcRdCost = NULL;
+  }
+          
+  if (m_pcPredSearch) {
+    delete m_pcPredSearch;
+    m_pcPredSearch = NULL;
+  }
+}
+
 /** \param    pcEncTop      pointer of encoder class
  */
 Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncSbac* pcRDGoOnSbacCoder )
@@ -211,10 +233,11 @@ Void TEncCu::init_new( TEncTop* pcEncTop, TEncEntropy* entropyCoder, TEncSbac***
   m_pcTrQuant->copyInit(pcEncTop->getTrQuant());
   m_pcTrQuant->copyTrQuant(pcEncTop->getTrQuant());
 
-  m_pcBitCounter      = pcEncTop->getBitCounter(); 
+//  m_pcBitCounter      = pcEncTop->getBitCounter(); 
   m_pcBitCounter      = new TComBitCounter;
 
-  m_pcRdCost          = pcEncTop->getRdCost();
+  m_pcRdCost          = new TComRdCost;
+  m_pcRdCost->copy(pcEncTop->getRdCost());
 //  m_pcRdCost          = new TComRdCost;
 
   m_pppcRDSbacCoder   = pppcRDSbacCoder;

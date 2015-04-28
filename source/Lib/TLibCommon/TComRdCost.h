@@ -150,7 +150,9 @@ private:
 public:
   TComRdCost();
   virtual ~TComRdCost();
-  
+
+  Void copy(TComRdCost* rdCost);
+
   Double  calcRdCost  ( UInt   uiBits, UInt   uiDistortion, Bool bFlag = false, DFunc eDFunc = DF_DEFAULT );
   Double  calcRdCost64( UInt64 uiBits, UInt64 uiDistortion, Bool bFlag = false, DFunc eDFunc = DF_DEFAULT );
   

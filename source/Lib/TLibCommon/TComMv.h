@@ -76,7 +76,8 @@ public:
   // ------------------------------------------------------------------------------------------------------------------
   // set
   // ------------------------------------------------------------------------------------------------------------------
-  
+ 
+  Void  copy      (TComMv* mv)                  { m_iHor = mv->getHor(); m_iVer = mv->getVer(); }
   Void  set       ( Short iHor, Short iVer)     { m_iHor = iHor;  m_iVer = iVer;            }
   Void  setHor    ( Short i )                   { m_iHor = i;                               }
   Void  setVer    ( Short i )                   { m_iVer = i;                               }
