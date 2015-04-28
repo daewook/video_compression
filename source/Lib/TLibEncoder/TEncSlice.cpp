@@ -804,17 +804,57 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
-Void TEncSlice::launchThread(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock, UInt uiWidthInLCUs, UInt uiHeightInLCUs, UInt numCPU, UInt volatile *processed, UInt startingRow, pthread_mutex_t *processedLock) {
+Void TEncSlice::launchThread(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock, UInt uiWidthInLCUs, UInt uiHeightInLCUs, UInt numCPU,  UInt startingRow) {
   for (UInt i = startingRow; i < uiHeightInLCUs; i+= numCPU) {
 //    printf("launchThread %d row: %d\n", startingRow, i);
-    processRow(bitCounter, uiEncCUOrder, rpcPic, uiBoundingCUAddr, pcSlice, lock, uiWidthInLCUs, uiHeightInLCUs, processed, i, processedLock);
+    processRow(bitCounter, uiEncCUOrder, rpcPic, uiBoundingCUAddr, pcSlice, lock, uiWidthInLCUs, uiHeightInLCUs, i);
     uiEncCUOrder += uiWidthInLCUs * numCPU;
   }
 
   return;
 }
 
-Void TEncSlice::processRow(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock, UInt uiWidthInLCUs, UInt uiHeightInLCUs,  UInt volatile *processed, UInt currentRow, pthread_mutex_t *processedLock)
+Void TEncSlice::processCTU(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs,
+                           TEncCu cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
+                           TEncSbac* sbacCoder, TEncBinCABAC* binCABAC)
+{
+  UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
+
+  bitCounter.resetBits();
+
+  TEncTop* pcEncTop = (TEncTop*) m_pcCfg;
+
+  UInt uiCol = uiCUAddr % uiWidthInLCUs;
+  UInt uiLin = uiCUAddr / uiWidthInLCUs;
+
+  TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
+
+  pcCU->initCU( rpcPic, uiCUAddr );
+
+  // if RD based on SBAC is used
+  if( m_pcCfg->getUseSBACRD() )
+  {
+    // set go-on entropy coder
+    entropyCoder->setEntropyCoder ( pcRDGoOnSbacCoder, pcSlice );
+    if (uiCol == 0) {
+      entropyCoder->resetEntropy();
+    }
+    
+    entropyCoder->setBitstream( &bitCounter );
+    
+    ((TEncBinCABAC*)pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
+
+    // run CU encoder
+    cuEncoder.compressCU( pcCU );
+
+    // restore entropy coder to an initial stage
+    entropyCoder->setEntropyCoder ( pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
+    entropyCoder->setBitstream( &bitCounter );
+    cuEncoder.encodeCU( pcCU );
+  }
+}
+
+Void TEncSlice::processRow(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock, UInt uiWidthInLCUs, UInt uiHeightInLCUs, UInt currentRow)
 {
   UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
 
@@ -863,10 +903,6 @@ Void TEncSlice::processRow(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic
   for(UInt cntProcessed = 0 ; first || uiCUAddr % uiWidthInLCUs != 0
        ; uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder), cntProcessed++ )
   {
-//    printf("here currentRow: %d, cntProcessed: %d, processed[currentRow - 1]: %d\n", (int)currentRow, (int)cntProcessed, (int)(currentRow == 0 ? -1 : processed[currentRow - 1]));
-    while (currentRow != 0 && cntProcessed + 2 > processed[currentRow - 1]) { // wait for the above row
-    }
-//    printf("there currentRow: %d, cntProcessed: %d, processed[currentRow - 1]: %d\n", (int)currentRow, (int)cntProcessed, (int)(currentRow == 0 ? -1 : processed[currentRow - 1]));
 
     UInt uiCol = uiCUAddr % uiWidthInLCUs;
     UInt uiLin = uiCUAddr / uiWidthInLCUs;
@@ -899,12 +935,10 @@ Void TEncSlice::processRow(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic
       cuEncoder.encodeCU( pcCU );
     }
 
-    processed[currentRow] = cntProcessed + 1;
     uiPicTotalBits += pcCU->getTotalBits();
     dPicRdCost     += pcCU->getTotalCost();
     uiPicDist      += pcCU->getTotalDistortion();
   }
-  processed[currentRow] = uiWidthInLCUs + 2;
 
   pthread_mutex_lock(&lock);
   m_uiPicTotalBits += uiPicTotalBits;
@@ -1020,10 +1054,6 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   // for every CU in slice
   UInt numCPU = 12;//__cilkrts_get_nworkers();
   numCPU = numCPU < uiHeightInLCUs ? numCPU : uiHeightInLCUs;
-  UInt volatile *processed = new UInt[uiHeightInLCUs];
-  pthread_mutex_t* processedLock = new pthread_mutex_t[uiHeightInLCUs];
-
-  printf("height: %d, numCPU: %d\n", (int)uiHeightInLCUs, (int)numCPU);
 
   pthread_mutex_t lock;
   UInt uiEncCUOrder;
@@ -1035,8 +1065,8 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
 
 //  bitCounters = new TComBitCounter[numTiles];
 //  tile_uiEncCUOrders = new UInt[numTiles];
-  bitCounters = new TComBitCounter[numCPU];
-  wpp_uiEncCUOrders = new UInt[numCPU];
+  bitCounters = new TComBitCounter[uiHeightInLCUs];
+  wpp_uiEncCUOrders = new UInt[uiHeightInLCUs];
 
   pthread_mutex_init(&lock, NULL);
 
@@ -1054,13 +1084,54 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     }
   }
 
-  for (UInt i = 0; i < uiHeightInLCUs; i++) {
-    processed[i] = 0;
-    pthread_mutex_init(&processedLock[i], NULL);
-  }
+  /* initialization */
+  TEncCu cuEncoder[uiHeightInLCUs];
+  TEncEntropy* entropyCoder[uiHeightInLCUs];
+  TEncSbac*** pppcRDSbacCoder[uiHeightInLCUs];
+  TEncBinCABACCounter*** pppcBinCoderCABAC[uiHeightInLCUs];
+  TEncSbac* pcRDGoOnSbacCoder[uiHeightInLCUs];
+  TEncSbac* sbacCoder[uiHeightInLCUs];
+  TEncBinCABAC* binCABAC[uiHeightInLCUs];
 
-  cilk_for (UInt i = 0; i < numCPU; i++) {
-    launchThread(bitCounters[i], wpp_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice, lock, uiWidthInLCUs, uiHeightInLCUs, numCPU, processed, i, processedLock);
+  for (UInt i = 0; i < uiHeightInLCUs; i++) {
+    pppcRDSbacCoder[i]= new TEncSbac** [g_uiMaxCUDepth+1];
+    pppcBinCoderCABAC[i] = new TEncBinCABACCounter** [g_uiMaxCUDepth+1];
+    for (Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ ) {
+      pppcRDSbacCoder[i][iDepth] = new TEncSbac* [CI_NUM];
+      pppcBinCoderCABAC[i][iDepth] = new TEncBinCABACCounter* [CI_NUM];
+      for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) {
+        pppcRDSbacCoder[i][iDepth][iCIIdx] = new TEncSbac;
+        pppcBinCoderCABAC[i][iDepth][iCIIdx] = new TEncBinCABACCounter;
+        pppcRDSbacCoder[i][iDepth][iCIIdx]->init( pppcBinCoderCABAC[i][iDepth][iCIIdx] );
+      }
+    }
+
+    entropyCoder[i] = new TEncEntropy;
+    sbacCoder[i] = new TEncSbac;
+    binCABAC[i] = new TEncBinCABAC;
+
+    sbacCoder[i]->init(binCABAC[i]);
+    entropyCoder[i]->setEntropyCoder(sbacCoder[i], pcSlice);
+    entropyCoder[i]->resetEntropy();
+    pppcRDSbacCoder[i][0][CI_CURR_BEST]->load(sbacCoder[i]);
+
+    pcRDGoOnSbacCoder[i] = sbacCoder[i];
+
+    cuEncoder[i].create(g_uiMaxCUDepth, g_uiMaxCUWidth, g_uiMaxCUHeight);
+    cuEncoder[i].init_new(pcEncTop, entropyCoder[i], pppcRDSbacCoder[i], pcRDGoOnSbacCoder[i]);
+  }
+  /* initialization end */
+
+  for (UInt i = 0; i < uiWidthInLCUs + 2 * (uiHeightInLCUs - 1); i++) {
+    UInt start = max(0, (int)floor((float)(i - uiWidthInLCUs) / 2.0) + 1);
+    UInt end = min(uiHeightInLCUs - 1, i / 2);
+    cilk_for (UInt y = start; y <= end; y++) {
+      UInt x = i - 2 * y;
+
+      processCTU(bitCounters[y], wpp_uiEncCUOrders[y] + x, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+                 cuEncoder[y], entropyCoder[y], pppcRDSbacCoder[y], pppcBinCoderCABAC[y], pcRDGoOnSbacCoder[y],
+                 sbacCoder[y], binCABAC[y]);
+    }
   }
 /*  for (UInt i = 0; i < uiHeightInLCUs; i++) {
     processRow(bitCounters[i], wpp_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice, lock, uiWidthInLCUs);
@@ -1086,7 +1157,6 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   }*/
 
   //free(bitCounters);
-  free((void *)processed);
   free(wpp_uiEncCUOrders);
 
   //cilk_sync;

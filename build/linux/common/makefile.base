@@ -12,7 +12,7 @@ endif
 # executables used
 #########################################################
 
-CPP   	= clang++
+CPP   	= icpc
 AR    	= ar
 LD    	= $(CPP)
 ASM		= nasm
@@ -60,10 +60,12 @@ endif
 #
 # debug cpp flags
 #DEBUG_CPPFLAGS    = -g -O2 -D_DEBUG -L /scratch/daewook/cilktools/lib -fcilktool-instr-c -lrt -fcilkplus -ldl -gdwarf-3
-DEBUG_CPPFLAGS    = -g  -D_DEBUG -fcilkplus -gdwarf-3
+#DEBUG_CPPFLAGS    = -g  -D_DEBUG -fcilkplus -gdwarf-3
+DEBUG_CPPFLAGS    = -g -O1 -D_DEBUG -gdwarf-3
 #
 # release cpp
-RELEASE_CPPFLAGS  =  -O3 -ffloat-store -Wuninitialized -fcilkplus -gdwarf-3
+#RELEASE_CPPFLAGS  =  -O3 -ffloat-store -Wuninitialized -fcilkplus -gdwarf-3
+RELEASE_CPPFLAGS  =  -O3 -ffloat-store -Wuninitialized -gdwarf-3
 
 
 #########################################################
