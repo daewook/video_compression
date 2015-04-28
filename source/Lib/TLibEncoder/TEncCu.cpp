@@ -198,26 +198,28 @@ Void TEncCu::destroy()
     delete [] m_ppcOrigYuv;
     m_ppcOrigYuv = NULL;
   }
+}
 
-/*  if (m_pcTrQuant) {
-    delete [] m_pcTrQuant;
+Void TEncCu::destroyTileTEncCu() {
+  if (m_pcTrQuant) {
+    delete m_pcTrQuant;
     m_pcTrQuant = NULL;
-  }*/
+  }
 
-/*  if (m_pcBitCounter) {
-    delete [] m_pcBitCounter;
+  if (m_pcBitCounter) {
+    delete m_pcBitCounter;
     m_pcBitCounter = NULL;
-  }*/
+  }
 
-/*  if (m_pcRdCost) {
-    delete [] m_pcRdCost;
+  if (m_pcRdCost) {
+    delete m_pcRdCost;
     m_pcRdCost = NULL;
-  }*/
+  }
 
-/*  if (m_pcPredSearch) {
-    delete [] m_pcPredSearch;
+  if (m_pcPredSearch) {
+    delete m_pcPredSearch;
     m_pcPredSearch = NULL;
-  }*/
+  }
 }
 
 /** \param    pcEncTop      pointer of encoder class

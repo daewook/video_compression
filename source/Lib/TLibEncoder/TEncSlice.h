@@ -120,7 +120,7 @@ public:
 #endif
   // compress and encode slice
   Void    precompressSlice    ( TComPic*& rpcPic                                );      ///< precompress slice for multi-loop opt.
-  Void    processTile         ( TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice);
+  Void    processTile         ( TEncCu* cuEncoder, TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice);
   Void    compressSlice       ( TComPic*& rpcPic                                );      ///< analysis stage of slice
 #if RATE_CONTROL_INTRA
   Void    calCostSliceI       ( TComPic*& rpcPic );

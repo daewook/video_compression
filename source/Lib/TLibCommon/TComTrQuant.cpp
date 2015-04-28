@@ -1226,7 +1226,7 @@ Void TComTrQuant::copyTrQuant(TComTrQuant *trQuant) {
     m_plTempCoeff[i] = trQuant->m_plTempCoeff[i];
   }
 
-  m_pcEstBitsSbac = new estBitsSbacStruct;
+//  m_pcEstBitsSbac = new estBitsSbacStruct;
   memcpy(m_pcEstBitsSbac, trQuant->m_pcEstBitsSbac, sizeof(estBitsSbacStruct));
   
   m_cQP.m_iQP = trQuant->m_cQP.m_iQP;
@@ -1585,25 +1585,25 @@ Void TComTrQuant::xRateDistOptQuant                 ( TComDataCU*               
 #if ADAPTIVE_QP_SELECTION
   memset(piArlDstCoeff, 0, sizeof(Int) *  uiMaxNumCoeff);
 #endif
-  Double* pdCostCoeff = new Double[ 32 * 32 ];
+/*  Double* pdCostCoeff = new Double[ 32 * 32 ];
   Double* pdCostSig = new Double[ 32 * 32 ];
   Double* pdCostCoeff0 = new Double[ 32 * 32 ];
   Int* rateIncUp   = new Int[ 32 * 32 ];
   Int* rateIncDown = new Int[ 32 * 32 ];
   Int* sigRateDelta= new Int[ 32 * 32 ];
-  Int* deltaU      = new Int[ 32 * 32 ];
+  Int* deltaU      = new Int[ 32 * 32 ];*/
  
 
 
-  //Double pdCostCoeff [ 32 * 32 ];
-  //Double pdCostSig   [ 32 * 32 ];
-  //Double pdCostCoeff0[ 32 * 32 ];
+  Double pdCostCoeff [ 32 * 32 ];
+  Double pdCostSig   [ 32 * 32 ];
+  Double pdCostCoeff0[ 32 * 32 ];
   ::memset( pdCostCoeff, 0, sizeof(Double) *  uiMaxNumCoeff );
   ::memset( pdCostSig,   0, sizeof(Double) *  uiMaxNumCoeff );
-  //Int rateIncUp   [ 32 * 32 ];
-  //Int rateIncDown [ 32 * 32 ];
-  //Int sigRateDelta[ 32 * 32 ];
-  //Int deltaU      [ 32 * 32 ];
+  Int rateIncUp   [ 32 * 32 ];
+  Int rateIncDown [ 32 * 32 ];
+  Int sigRateDelta[ 32 * 32 ];
+  Int deltaU      [ 32 * 32 ];
   ::memset( rateIncUp,    0, sizeof(Int) *  uiMaxNumCoeff );
   ::memset( rateIncDown,  0, sizeof(Int) *  uiMaxNumCoeff );
   ::memset( sigRateDelta, 0, sizeof(Int) *  uiMaxNumCoeff );
@@ -2068,13 +2068,13 @@ Void TComTrQuant::xRateDistOptQuant                 ( TComDataCU*               
     }
   }
 
-  delete[] pdCostCoeff;
+/*  delete[] pdCostCoeff;
   delete[] pdCostSig;
   delete[] pdCostCoeff0;
   delete[] rateIncUp;
   delete[] rateIncDown;
   delete[] sigRateDelta;
-  delete[] deltaU;
+  delete[] deltaU;*/
  
 }
 
