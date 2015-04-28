@@ -124,7 +124,7 @@ public:
   Void    processRow          ( TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, pthread_mutex_t &lock, UInt uiWidthInLCUs, UInt uiHeightInLCUs, UInt currentRow );
 
   Void            processCTU(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs, 
-                             TEncCu cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
+                             TEncCu* cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
                              TEncSbac* sbacCoder, TEncBinCABAC* binCABAC);
 
   Void    compressSlice       ( TComPic*& rpcPic                                );      ///< analysis stage of slice

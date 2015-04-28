@@ -815,7 +815,7 @@ Void TEncSlice::launchThread(TComBitCounter bitCounter, UInt uiEncCUOrder, TComP
 }
 
 Void TEncSlice::processCTU(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs,
-                           TEncCu cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
+                           TEncCu* cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
                            TEncSbac* sbacCoder, TEncBinCABAC* binCABAC)
 {
   UInt uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(uiEncCUOrder);
@@ -845,12 +845,12 @@ Void TEncSlice::processCTU(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic
     ((TEncBinCABAC*)pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
 
     // run CU encoder
-    cuEncoder.compressCU( pcCU );
+    cuEncoder->compressCU( pcCU );
 
     // restore entropy coder to an initial stage
     entropyCoder->setEntropyCoder ( pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );
     entropyCoder->setBitstream( &bitCounter );
-    cuEncoder.encodeCU( pcCU );
+    cuEncoder->encodeCU( pcCU );
   }
 }
 
@@ -1085,13 +1085,21 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   }
 
   /* initialization */
-  TEncCu cuEncoder[uiHeightInLCUs];
-  TEncEntropy* entropyCoder[uiHeightInLCUs];
-  TEncSbac*** pppcRDSbacCoder[uiHeightInLCUs];
-  TEncBinCABACCounter*** pppcBinCoderCABAC[uiHeightInLCUs];
-  TEncSbac* pcRDGoOnSbacCoder[uiHeightInLCUs];
-  TEncSbac* sbacCoder[uiHeightInLCUs];
-  TEncBinCABAC* binCABAC[uiHeightInLCUs];
+  TEncCu** cuEncoder;
+  TEncEntropy** entropyCoder;
+  TEncSbac**** pppcRDSbacCoder;
+  TEncBinCABACCounter**** pppcBinCoderCABAC;
+  TEncSbac** pcRDGoOnSbacCoder;
+  TEncSbac** sbacCoder;
+  TEncBinCABAC** binCABAC;
+
+  cuEncoder = new TEncCu* [uiHeightInLCUs];
+  entropyCoder = new TEncEntropy* [uiHeightInLCUs];
+  pppcRDSbacCoder = new TEncSbac*** [uiHeightInLCUs];
+  pppcBinCoderCABAC = new TEncBinCABACCounter*** [uiHeightInLCUs];
+  pcRDGoOnSbacCoder = new TEncSbac* [uiHeightInLCUs];
+  sbacCoder = new TEncSbac* [uiHeightInLCUs];
+  binCABAC = new TEncBinCABAC* [uiHeightInLCUs];
 
   for (UInt i = 0; i < uiHeightInLCUs; i++) {
     pppcRDSbacCoder[i]= new TEncSbac** [g_uiMaxCUDepth+1];
@@ -1106,6 +1114,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
       }
     }
 
+    cuEncoder[i] = new TEncCu;
     entropyCoder[i] = new TEncEntropy;
     sbacCoder[i] = new TEncSbac;
     binCABAC[i] = new TEncBinCABAC;
@@ -1117,8 +1126,8 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
 
     pcRDGoOnSbacCoder[i] = sbacCoder[i];
 
-    cuEncoder[i].create(g_uiMaxCUDepth, g_uiMaxCUWidth, g_uiMaxCUHeight);
-    cuEncoder[i].init_new(pcEncTop, entropyCoder[i], pppcRDSbacCoder[i], pcRDGoOnSbacCoder[i]);
+    cuEncoder[i]->create(g_uiMaxCUDepth, g_uiMaxCUWidth, g_uiMaxCUHeight);
+    cuEncoder[i]->init_new(pcEncTop, entropyCoder[i], pppcRDSbacCoder[i], pcRDGoOnSbacCoder[i]);
   }
   /* initialization end */
 
