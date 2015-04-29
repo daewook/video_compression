@@ -282,6 +282,8 @@ Void TEncCu::compressCU( TEncSlice* slice, TComDataCU*& rpcCU )
 #endif
 
   destroy_DATA(data);
+  delete sbac;
+  delete cabac;
 }
 /** \param  pcCU  pointer of CU data class
  */
@@ -470,13 +472,13 @@ Void TEncCu::create_DATA(DATA& data, UInt depth) {
 }
 
 Void TEncCu::destroy_DATA(DATA& data) {
-  return; //TODO make destroy work
-  if (data.bestCU) {
+//  return; //TODO make destroy work
+/*  if (data.bestCU) {
     data.bestCU->destroy(); delete data.bestCU; data.bestCU = NULL;
   }
   if (data.tempCU) {
     data.tempCU->destroy(); delete data.tempCU; data.tempCU = NULL;
-  }
+  }*/
   if (data.predYuvBest) {
     data.predYuvBest->destroy(); delete data.predYuvBest; data.predYuvBest = NULL;
   }
@@ -961,10 +963,10 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       search2.copySearch(search, pcSlice);
 
 //      printf("depth: %d new spawn\n", uiDepth);
-      //cilk_spawn xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
-      xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
+      cilk_spawn xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
+//      xCompressCUPart(search, &data, &subData, pcSlice, 1, iQP, uiDepth, uhNextDepth, sbac1);
       xCompressCUPart(&search2, &data, &subData2, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
-      //cilk_sync;
+      cilk_sync;
 
 //      printf("depth: %d spawn synced\n", uiDepth);
 //      search->copySearch(&search2, pcSlice);
@@ -973,8 +975,8 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       // done
 
       data.dQPFlag = subData.dQPFlag;
-//      destroy_DATA(subData);
-//      destroy_DATA(subData2);
+      destroy_DATA(subData);
+      destroy_DATA(subData2);
       delete sbac1;
       delete cabac1;
       sbac1 = NULL;
