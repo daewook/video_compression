@@ -101,6 +101,7 @@ protected:
   TComTrQuant*    m_pcTrQuant;
   TComRdCost*     m_pcRdCost;
   TEncEntropy*    m_pcEntropyCoder;
+  TComBitCounter* m_pcEntropyCoderCounter;
   
   // ME parameters
   Int             m_iSearchRange;
@@ -112,6 +113,7 @@ protected:
   TComMv          m_acMvPredictors[3];
   
   // RD computation
+  TEncBinCABACCounter***  m_pppcBinCoderCABAC;
   TEncSbac***     m_pppcRDSbacCoder;
   TEncSbac*       m_pcRDGoOnSbacCoder;
   Bool            m_bUseSBACRD;
@@ -140,6 +142,8 @@ public:
             TComRdCost*   pcRdCost,
             TEncSbac***   pppcRDSbacCoder,
             TEncSbac*     pcRDGoOnSbacCoder );
+
+  Void destroy();
 
   
 protected:

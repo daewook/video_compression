@@ -473,12 +473,12 @@ Void TEncCu::create_DATA(DATA& data, UInt depth) {
 
 Void TEncCu::destroy_DATA(DATA& data) {
 //  return; //TODO make destroy work
-/*  if (data.bestCU) {
+  if (data.bestCU) {
     data.bestCU->destroy(); delete data.bestCU; data.bestCU = NULL;
   }
   if (data.tempCU) {
     data.tempCU->destroy(); delete data.tempCU; data.tempCU = NULL;
-  }*/
+  }
   if (data.predYuvBest) {
     data.predYuvBest->destroy(); delete data.predYuvBest; data.predYuvBest = NULL;
   }
@@ -968,6 +968,7 @@ Void TEncCu::xCompressCU( TEncSearch *search, TComDataCU*& rpcBestCU, TComDataCU
       xCompressCUPart(&search2, &data, &subData2, pcSlice, 2, iQP, uiDepth, uhNextDepth, sbac1);
       cilk_sync;
 
+      search2.destroy();
 //      printf("depth: %d spawn synced\n", uiDepth);
 //      search->copySearch(&search2, pcSlice);
 //      cilk_sync;

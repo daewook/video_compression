@@ -298,6 +298,42 @@ void TEncSearch::init(TEncCfg*      pcEncCfg,
   m_tmpYuvPred.create(MAX_CU_SIZE, MAX_CU_SIZE);
 }
 
+Void TEncSearch::destroy() {
+  delete m_pcTrQuant;
+
+  delete m_pcEntropyCoderCounter;
+  delete m_pcEntropyCoder;
+
+  delete m_pcRdCost;
+
+  delete m_pcRDGoOnSbacCoder->getEncBinIf();
+  delete m_pcRDGoOnSbacCoder;
+
+  for ( Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ )
+  {    
+    for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) 
+    { 
+      delete m_pppcBinCoderCABAC[iDepth][iCIIdx];
+      delete m_pppcRDSbacCoder[iDepth][iCIIdx];
+    }
+
+    delete [] m_pppcBinCoderCABAC[iDepth];
+    delete [] m_pppcRDSbacCoder[iDepth];
+  }
+  delete [] m_pppcBinCoderCABAC;
+  delete [] m_pppcRDSbacCoder;
+
+
+ // delete m_RDSbacCoder;
+/*
+  copyRDGoOnSbacCoder(search->getRDGoOnSbacCoder());
+  copyRDSbacCoder(search->getRDSbacCoder());
+  copyPcRdCost(search->getPcRdCost());
+  copyEntropyCoder(search->getEntropyCoder(), pcSlice);
+  copyTrQuant(search->getTrQuant());
+*/
+}
+
 #if FASTME_SMOOTHER_MV
 #define FIRSTSEARCHSTOP     1
 #else
@@ -2387,8 +2423,8 @@ TEncSearch::xSetIntraResultChromaQT( TComDataCU* pcCU,
 Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice) {
   m_pcEntropyCoder = new TEncEntropy;
   m_pcEntropyCoder->setEntropyCoder (m_pcRDGoOnSbacCoder, pcSlice);
-  TComBitCounter* counter = new TComBitCounter;
-  m_pcEntropyCoder->setBitstream(counter);
+  m_pcEntropyCoderCounter = new TComBitCounter;
+  m_pcEntropyCoder->setBitstream(m_pcEntropyCoderCounter);
 }
 
 Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* previousCoder) {
@@ -2423,6 +2459,7 @@ Void TEncSearch::copyRDSbacCoder(TEncSbac*** previousCoder) {
     }    
   }
 
+  m_pppcBinCoderCABAC = binCoderCABAC;
   m_pppcRDSbacCoder = RDSbacCoder;
 }
 
