@@ -804,6 +804,56 @@ Void TEncSlice::calCostSliceI(TComPic*& rpcPic)
 }
 #endif
 
+Void TEncSlice::compressRect(Int startX, Int endX, Int startY, Int endY, 
+                             TComBitCounter* bitCounters, UInt* uiEncCUOrders, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs,
+                             TEncCu** cuEncoders, TEncEntropy** entropyCoder, TEncSbac**** pppcRDSbacCoder, TEncBinCABACCounter**** pppcBinCoderCABAC, TEncSbac** pcRDGoOnSbacCoder,
+                             TEncSbac** sbacCoder, TEncBinCABAC** binCABAC)
+{
+//  printf("in RECT %d %d %d %d\n", (int)startY, (int)endY, (int)startX, (int)endX);
+  if (startX > endX || startY > endY) {
+    return;
+  }
+
+  UInt x;
+  UInt y;
+
+  if (startX == endX && startY == endY) {
+    printf("process: %d %d\n", (int)endY, (int)startX);
+    x = startX;
+    y = startY;
+    processCTU(bitCounters[y], uiEncCUOrders[y] + x, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+               cuEncoders[y], entropyCoder[y], pppcRDSbacCoder[y], pppcBinCoderCABAC[y], pcRDGoOnSbacCoder[y],
+               sbacCoder[y], binCABAC[y]);
+
+    return;
+  }
+
+  Int midX = (startX + endX) / 2;
+  Int midY = (startY + endY) / 2;
+
+  compressRect(startX, midX, startY, midY,
+               bitCounters, uiEncCUOrders, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+               cuEncoders, entropyCoder, pppcRDSbacCoder, pppcBinCoderCABAC, pcRDGoOnSbacCoder,
+               sbacCoder, binCABAC);
+
+  cilk_spawn compressRect(midX + 1, endX, startY, midY,
+                          bitCounters, uiEncCUOrders, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+                          cuEncoders, entropyCoder, pppcRDSbacCoder, pppcBinCoderCABAC, pcRDGoOnSbacCoder,
+                          sbacCoder, binCABAC);
+
+  compressRect(startX, midX - 1, midY + 1, endY,
+               bitCounters, uiEncCUOrders, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+               cuEncoders, entropyCoder, pppcRDSbacCoder, pppcBinCoderCABAC, pcRDGoOnSbacCoder,
+               sbacCoder, binCABAC);
+
+  cilk_sync;
+
+  compressRect(midX, endX, midY + 1, endY,
+               bitCounters, uiEncCUOrders, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+               cuEncoders, entropyCoder, pppcRDSbacCoder, pppcBinCoderCABAC, pcRDGoOnSbacCoder,
+               sbacCoder, binCABAC);
+}
+
 Void TEncSlice::processCTU(TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs,
                            TEncCu* cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
                            TEncSbac* sbacCoder, TEncBinCABAC* binCABAC)
@@ -1003,7 +1053,13 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   }
   /* initialization end */
 
-  for (UInt i = 0; i < uiWidthInLCUs + 2 * (uiHeightInLCUs - 1); i++) {
+  compressRect(0, uiWidthInLCUs - 1, 0, uiHeightInLCUs - 1,
+               bitCounters, wpp_uiEncCUOrders, rpcPic, uiBoundingCUAddr, pcSlice, uiWidthInLCUs, uiHeightInLCUs, 
+               cuEncoders, entropyCoder, pppcRDSbacCoder, pppcBinCoderCABAC, pcRDGoOnSbacCoder,
+               sbacCoder, binCABAC);
+
+
+/*  for (UInt i = 0; i < uiWidthInLCUs + 2 * (uiHeightInLCUs - 1); i++) {
     UInt start = max(0, (int)floor((float)(i - uiWidthInLCUs) / 2.0) + 1);
     UInt end = min(uiHeightInLCUs - 1, i / 2);
     cilk_for (UInt y = start; y <= end; y++) {
@@ -1013,7 +1069,7 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
                  cuEncoders[y], entropyCoder[y], pppcRDSbacCoder[y], pppcBinCoderCABAC[y], pcRDGoOnSbacCoder[y],
                  sbacCoder[y], binCABAC[y]);
     }
-  }
+  }*/
 
   m_pcEntropyCoder->setBitstream( &pcBitCounters[uiSubStrm] );
 

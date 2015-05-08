@@ -120,9 +120,14 @@ public:
 #endif
   // compress and encode slice
   Void    precompressSlice    ( TComPic*& rpcPic                                );      ///< precompress slice for multi-loop opt.
+
+  Void    compressRect        ( Int startX, Int endX, Int startY, Int endY,
+                                TComBitCounter* bitCounters, UInt* uiEncCUOrders, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs,
+                                TEncCu** cuEncoders, TEncEntropy** entropyCoder, TEncSbac**** pppcRDSbacCoder, TEncBinCABACCounter**** pppcBinCoderCABAC, TEncSbac** pcRDGoOnSbacCoder,
+                                TEncSbac** sbacCoder, TEncBinCABAC** binCABAC   );
   Void    processCTU          ( TComBitCounter bitCounter, UInt uiEncCUOrder, TComPic*& rpcPic, UInt uiBoundingCUAddr, TComSlice* pcSlice, UInt uiWidthInLCUs, UInt uiHeightInLCUs, 
-                             TEncCu* cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
-                             TEncSbac* sbacCoder, TEncBinCABAC* binCABAC);
+                                TEncCu* cuEncoder, TEncEntropy* entropyCoder, TEncSbac*** pppcRDSbacCoder, TEncBinCABACCounter*** pppcBinCoderCABAC, TEncSbac* pcRDGoOnSbacCoder,
+                                TEncSbac* sbacCoder, TEncBinCABAC* binCABAC     );
 
   Void    compressSlice       ( TComPic*& rpcPic                                );      ///< analysis stage of slice
 #if RATE_CONTROL_INTRA
