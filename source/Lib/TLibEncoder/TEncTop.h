@@ -139,6 +139,8 @@ public:
   Void      deletePicBuffer ();
 
   Void      createWPPCoders(Int iNumSubstreams);
+
+  Void init_TEncSearch(TEncSearch *search);
   
   // -------------------------------------------------------------------------------------------------------------------
   // member access functions

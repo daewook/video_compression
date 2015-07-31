@@ -284,6 +284,32 @@ void TEncSearch::init(TEncCfg*      pcEncCfg,
   m_tmpYuvPred.create(MAX_CU_SIZE, MAX_CU_SIZE);
 }
 
+Void TEncSearch::destroy() {
+  delete m_pcTrQuant;
+
+  delete m_pcEntropyCoderCounter;
+  delete m_pcEntropyCoder;
+
+  delete m_pcRdCost;
+
+  delete m_pcRDGoOnSbacCoder->getEncBinIf();
+  delete m_pcRDGoOnSbacCoder;
+
+  for ( Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ )
+  {    
+    for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) 
+    { 
+      delete m_pppcBinCoderCABAC[iDepth][iCIIdx];
+      delete m_pppcRDSbacCoder[iDepth][iCIIdx];
+    }
+
+    delete [] m_pppcBinCoderCABAC[iDepth];
+    delete [] m_pppcRDSbacCoder[iDepth];
+  }
+  delete [] m_pppcBinCoderCABAC;
+  delete [] m_pppcRDSbacCoder;
+}
+
 #if FASTME_SMOOTHER_MV
 #define FIRSTSEARCHSTOP     1
 #else
@@ -2370,6 +2396,78 @@ TEncSearch::xSetIntraResultChromaQT( TComDataCU* pcCU,
   }
 }
 
+Void TEncSearch::copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice) {
+  m_pcEntropyCoder = new TEncEntropy;
+  m_pcEntropyCoder->setEntropyCoder (m_pcRDGoOnSbacCoder, pcSlice);
+  m_pcEntropyCoderCounter = new TComBitCounter;
+  m_pcEntropyCoder->setBitstream(m_pcEntropyCoderCounter);
+}
+
+Void TEncSearch::copyRDGoOnSbacCoder(TEncSbac* previousCoder) {
+  if (previousCoder == NULL) return;
+
+  TEncSbac* RDGoOnSbacCoder = new TEncSbac;
+  TEncBinCABACCounter* binCoderCABAC = new TEncBinCABACCounter;
+
+  RDGoOnSbacCoder->init(binCoderCABAC);
+
+  RDGoOnSbacCoder->load(previousCoder);
+
+  m_pcRDGoOnSbacCoder = RDGoOnSbacCoder;
+}
+
+Void TEncSearch::copyRDSbacCoder(TEncSbac*** previousCoder) {
+  TEncSbac*** RDSbacCoder = new TEncSbac** [g_uiMaxCUDepth+1];
+  TEncBinCABACCounter*** binCoderCABAC = new TEncBinCABACCounter** [g_uiMaxCUDepth+1];
+            
+  for ( Int iDepth = 0; iDepth < g_uiMaxCUDepth+1; iDepth++ )
+  {    
+    RDSbacCoder[iDepth] = new TEncSbac* [CI_NUM];
+    binCoderCABAC[iDepth] = new TEncBinCABACCounter* [CI_NUM];
+                                           
+    for (Int iCIIdx = 0; iCIIdx < CI_NUM; iCIIdx ++ ) 
+    {    
+      RDSbacCoder[iDepth][iCIIdx] = new TEncSbac;
+      binCoderCABAC [iDepth][iCIIdx] = new TEncBinCABACCounter;
+      RDSbacCoder   [iDepth][iCIIdx]->init( binCoderCABAC [iDepth][iCIIdx] );
+
+      RDSbacCoder[iDepth][iCIIdx]->load(previousCoder[iDepth][iCIIdx]);
+    }    
+  }
+
+  m_pppcBinCoderCABAC = binCoderCABAC;
+  m_pppcRDSbacCoder = RDSbacCoder;
+}
+
+Void TEncSearch::copyPcRdCost(TComRdCost* pcRdCost) {
+  m_pcRdCost = new TComRdCost;
+  m_pcRdCost->init();
+  
+  m_pcRdCost->m_cbDistortionWeight = pcRdCost->m_cbDistortionWeight;
+  m_pcRdCost->m_crDistortionWeight = pcRdCost->m_crDistortionWeight; 
+  m_pcRdCost->m_dLambda = pcRdCost->m_dLambda;
+  m_pcRdCost->m_sqrtLambda = pcRdCost->m_sqrtLambda;
+  m_pcRdCost->m_uiLambdaMotionSAD = pcRdCost->m_uiLambdaMotionSAD;
+  m_pcRdCost->m_uiLambdaMotionSSE = pcRdCost->m_uiLambdaMotionSSE;
+  m_pcRdCost->m_dFrameLambda = pcRdCost->m_dFrameLambda;
+  m_pcRdCost->m_uiCost = pcRdCost->m_uiCost;
+  m_pcRdCost->m_iCostScale = pcRdCost->m_iCostScale;
+
+  // TODO: copy m_mvPredPredictor?
+}
+
+Void TEncSearch::copyTrQuant(TComTrQuant* trQuant) {
+    m_pcTrQuant = new TComTrQuant;
+    m_pcTrQuant->copyTrQuant(trQuant);
+}
+
+Void TEncSearch::copySearch(TEncSearch *search, TComSlice *pcSlice) {
+  copyRDGoOnSbacCoder(search->getRDGoOnSbacCoder());
+  copyRDSbacCoder(search->getRDSbacCoder());
+  copyPcRdCost(search->getPcRdCost());
+  copyEntropyCoder(search->getEntropyCoder(), pcSlice);
+  copyTrQuant(search->getTrQuant());
+}
 
 Void 
 TEncSearch::preestChromaPredMode( TComDataCU* pcCU, 

@@ -627,6 +627,28 @@ Void TEncSlice::setSearchRange( TComSlice* pcSlice )
   }
 }
 
+Void TEncSlice::init_searchRange( TEncSearch* search, TComSlice* pcSlice )
+{
+  Int iCurrPOC = pcSlice->getPOC();
+  Int iRefPOC;
+  Int iGOPSize = m_pcCfg->getGOPSize();
+  Int iOffset = (iGOPSize >> 1);
+  Int iMaxSR = m_pcCfg->getSearchRange();
+  Int iNumPredDir = pcSlice->isInterP() ? 1 : 2;
+ 
+ for (Int iDir = 0; iDir <= iNumPredDir; iDir++)
+  {
+    //RefPicList e = (RefPicList)iDir;
+    RefPicList  e = ( iDir ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
+    for (Int iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(e); iRefIdx++)
+    {
+      iRefPOC = pcSlice->getRefPic(e, iRefIdx)->getPOC();
+      Int iNewSR = Clip3(8, iMaxSR, (iMaxSR*ADAPT_SR_SCALE*abs(iCurrPOC - iRefPOC)+iOffset)/iGOPSize);
+      search->setAdaptiveSearchRange(iDir, iRefIdx, iNewSR);
+    }
+  }
+}
+
 /**
  - multi-loop slice encoding for different slice QP
  .
@@ -855,12 +877,14 @@ Void TEncSlice::processTile(TEncCu* cuEncoder, TComBitCounter bitCounter, UInt u
   cuEncoder->create(g_uiMaxCUDepth, g_uiMaxCUWidth, g_uiMaxCUHeight);
   cuEncoder->init_new(pcEncTop, entropyCoder, pppcRDSbacCoder, pcRDGoOnSbacCoder);
 
+  printf("processTile\n");
   bool first = true;
 //  printf("here\n");
   for( ; uiEncCUOrder < (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU() &&
          (first || uiCUAddr != rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr())
        ; uiCUAddr = rpcPic->getPicSym()->getCUOrderMap(++uiEncCUOrder) )
   {
+    printf("processCU: %d, %d, %d\n", uiEncCUOrder, uiCUAddr, rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr());
 //    printf("%d %d | %d %d\n", uiEncCUOrder, (uiBoundingCUAddr+(rpcPic->getNumPartInCU()-1))/rpcPic->getNumPartInCU(), uiCUAddr, rpcPic->getPicSym()->getTComTile(rpcPic->getPicSym()->getTileIdxMap(uiCUAddr))->getFirstCUAddr());
 //    printf("B uiEncCUOrder, uiCUAddr: %d | %d\n", uiEncCUOrder, uiCUAddr);
     TComDataCU*& pcCU = rpcPic->getCU( uiCUAddr );
@@ -879,8 +903,10 @@ Void TEncSlice::processTile(TEncCu* cuEncoder, TComBitCounter bitCounter, UInt u
       
       ((TEncBinCABAC*)pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
 
+      printf("compressCU start\n");
       // run CU encoder
-      cuEncoder->compressCU( pcCU );
+      cuEncoder->compressCU( this, pcCU );
+      printf("compressCU end\n");
 
       // restore entropy coder to an initial stage
       entropyCoder->setEntropyCoder ( pppcRDSbacCoder[0][CI_CURR_BEST], pcSlice );

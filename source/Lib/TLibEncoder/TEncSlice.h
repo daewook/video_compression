@@ -129,6 +129,7 @@ public:
   
   // misc. functions
   Void    setSearchRange      ( TComSlice* pcSlice  );                                  ///< set ME range adaptively
+  Void    init_searchRange    ( TEncSearch* search, TComSlice* pcSlice );
   UInt64  getTotalBits        ()  { return m_uiPicTotalBits; }
   
   TEncCu*        getCUEncoder() { return m_pcCuEncoder; }                        ///< CU encoder

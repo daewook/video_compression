@@ -1583,4 +1583,15 @@ Void  TEncSbac::loadContexts ( TEncSbac* pScr)
 {
   this->xCopyContextsFrom(pScr);
 }
+
+Bool TEncSbac::compareSbac ( TEncSbac* pSbac ) {
+  // m_pcBinIf->copyState( pSrc->m_pcBinIf );
+
+  if (this->m_uiCoeffCost != pSbac->getCoeffCost()) return false;
+  if (this->m_uiLastQp != pSbac->getLastQp()) return false;
+ 
+  if (memcmp( m_contextModels, pSbac->getContextModels(), m_numContextModels * sizeof( ContextModel )) != 0) return false;
+
+  return true;
+}
 //! \}

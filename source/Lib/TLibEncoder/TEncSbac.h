@@ -80,6 +80,8 @@ public:
   // SBAC RD
   Void  resetCoeffCost         ()                { m_uiCoeffCost = 0;  }
   UInt  getCoeffCost           ()                { return  m_uiCoeffCost;  }
+  UInt  getLastQp              ()                { return  m_uiLastQp;  }
+  ContextModel* getContextModels()                { return  m_contextModels;  }
   
   Void  load                   ( TEncSbac* pScr  );
   Void  loadIntraDirModeLuma   ( TEncSbac* pScr  );
@@ -87,6 +89,9 @@ public:
   Void  loadContexts           ( TEncSbac* pScr  );
   Void  resetBits              ()                { m_pcBinIf->resetBits(); m_pcBitIf->resetBits(); }
   UInt  getNumberOfWrittenBits ()                { return m_pcBinIf->getNumWrittenBits(); }
+
+  Bool compareSbac             ( TEncSbac* pSbac );
+
   //--SBAC RD
 
   Void  codeVPS                 ( TComVPS* pcVPS );

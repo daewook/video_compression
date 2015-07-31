@@ -43,6 +43,7 @@
 #include "TLibCommon/TComMotionInfo.h"
 #include "TLibCommon/TComPattern.h"
 #include "TLibCommon/TComPrediction.h"
+#include "TLibCommon/TComBitCounter.h"
 #include "TLibCommon/TComTrQuant.h"
 #include "TLibCommon/TComPic.h"
 #include "TEncEntropy.h"
@@ -100,6 +101,7 @@ protected:
   TComTrQuant*    m_pcTrQuant;
   TComRdCost*     m_pcRdCost;
   TEncEntropy*    m_pcEntropyCoder;
+  TComBitCounter* m_pcEntropyCoderCounter;
   
   // ME parameters
   Int             m_iSearchRange;
@@ -111,6 +113,7 @@ protected:
   TComMv          m_acMvPredictors[3];
   
   // RD computation
+  TEncBinCABACCounter***  m_pppcBinCoderCABAC;
   TEncSbac***     m_pppcRDSbacCoder;
   TEncSbac*       m_pcRDGoOnSbacCoder;
   Bool            m_bUseSBACRD;
@@ -139,6 +142,8 @@ public:
             TComRdCost*   pcRdCost,
             TEncSbac***   pppcRDSbacCoder,
             TEncSbac*     pcRDGoOnSbacCoder );
+
+  Void destroy();
   
 protected:
   
@@ -169,6 +174,19 @@ protected:
 
 public:
   Int * get_aaiAdaptSR () {return (Int *)m_aaiAdaptSR;}
+
+  TEncEntropy* getEntropyCoder() {return m_pcEntropyCoder;}
+  TEncSbac* getRDGoOnSbacCoder() {return m_pcRDGoOnSbacCoder;}
+  TEncSbac*** getRDSbacCoder() {return m_pppcRDSbacCoder;}
+  TComTrQuant* getTrQuant() {return m_pcTrQuant;}
+  TComRdCost* getPcRdCost() {return m_pcRdCost;}
+
+  Void copySearch(TEncSearch *search, TComSlice *pcSlice);
+  Void copyEntropyCoder(TEncEntropy* entropyCoder, TComSlice *pcSlice);
+  Void copyRDGoOnSbacCoder(TEncSbac* RDGoOnSbacCoder);
+  Void copyRDSbacCoder(TEncSbac*** RDSbacCoder);
+  Void copyTrQuant(TComTrQuant* trQuant);
+  Void copyPcRdCost(TComRdCost* pcRdCost);
 
   Void  copySearchRange (TEncSearch *search) {
     Int * aaiAdaptSR = search->get_aaiAdaptSR();
@@ -221,6 +239,8 @@ public:
   
   /// set ME search range
   Void setAdaptiveSearchRange   ( Int iDir, Int iRefIdx, Int iSearchRange) { m_aaiAdaptSR[iDir][iRefIdx] = iSearchRange; }
+  Void copyAdaptiveSearchRange  ( TEncSearch *search);
+
   
   Void xEncPCM    (TComDataCU* pcCU, UInt uiAbsPartIdx, Pel* piOrg, Pel* piPCM, Pel* piPred, Pel* piResi, Pel* piReco, UInt uiStride, UInt uiWidth, UInt uiHeight, TextType eText);
   Void IPCMSearch (TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv*& rpcPredYuv, TComYuv*& rpcResiYuv, TComYuv*& rpcRecoYuv );
