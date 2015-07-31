@@ -815,6 +815,11 @@ Void TEncSlice::processTile(TEncCu* cuEncoder, TComBitCounter bitCounter, UInt u
   UInt dPicRdCost = 0;
   UInt uiPicDist = 0;
 
+  SliceType sliceType = pcSlice->getSliceType();
+  if (!pcSlice->isIntra() && pcSlice->getPPS()->getCabacInitPresentFlag() && pcSlice->getPPS()->getEncCABACTableIdx()!=I_SLICE) {
+     sliceType = (SliceType) pcSlice->getPPS()->getEncCABACTableIdx();
+  }
+
   TEncTop* pcEncTop = (TEncTop*) m_pcCfg;
   TEncEntropy* entropyCoder;
   TEncSbac*** pppcRDSbacCoder;
@@ -834,15 +839,16 @@ Void TEncSlice::processTile(TEncCu* cuEncoder, TComBitCounter bitCounter, UInt u
       pppcRDSbacCoder[iDepth][iCIIdx]->init( pppcBinCoderCABAC[iDepth][iCIIdx] );
     }
   }
+  pppcRDSbacCoder[0][CI_CURR_BEST]->load(m_pppcRDSbacCoder[0][CI_CURR_BEST]);
 
   entropyCoder = new TEncEntropy;
   sbacCoder = new TEncSbac;
-  binCABAC = new TEncBinCABAC;
+  binCABAC = new TEncBinCABACCounter;
 
   sbacCoder->init(binCABAC);
   entropyCoder->setEntropyCoder(sbacCoder, pcSlice);
-  entropyCoder->resetEntropy();
-  pppcRDSbacCoder[0][CI_CURR_BEST]->load(sbacCoder);
+//  entropyCoder->resetEntropy();
+//  pppcRDSbacCoder[0][CI_CURR_BEST]->load(sbacCoder);
 
   pcRDGoOnSbacCoder = sbacCoder;
 
@@ -867,7 +873,6 @@ Void TEncSlice::processTile(TEncCu* cuEncoder, TComBitCounter bitCounter, UInt u
       entropyCoder->setEntropyCoder ( pcRDGoOnSbacCoder, pcSlice );
       if (first) {
         first = false;
-        entropyCoder->resetEntropy();
       }
       
       entropyCoder->setBitstream( &bitCounter );
@@ -1030,7 +1035,6 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
   TEncCu* cuEncoders = new TEncCu[numTiles];
 
   cilk_for (UInt i = 0; i < numTiles; i++) {
-    //printf("tileID: %d\n", i);
     processTile(&cuEncoders[i], bitCounters[i], tile_uiEncCUOrders[i], rpcPic, uiBoundingCUAddr, pcSlice);
   }
 

@@ -73,6 +73,9 @@ Void TEncBinCABAC::start()
   m_bitsLeft         = 23;
   m_numBufferedBytes = 0;
   m_bufferedByte     = 0xff;
+#if FAST_BIT_EST
+  m_fracBits = 0;
+#endif
 }
 
 Void TEncBinCABAC::finish()

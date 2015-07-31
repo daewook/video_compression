@@ -773,7 +773,7 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
 #endif
     
     UInt uiNumSlices = 1;
-    
+
     UInt uiInternalAddress = pcPic->getNumPartInCU()-4;
     UInt uiExternalAddress = pcPic->getPicSym()->getNumberOfCUsInFrame()-1;
     UInt uiPosX = ( uiExternalAddress % pcPic->getFrameWidthInCU() ) * g_uiMaxCUWidth+ g_auiRasterToPelX[ g_auiZscanToRaster[uiInternalAddress] ];
@@ -1596,9 +1596,9 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
       m_pcEntropyCoder->setEntropyCoder(m_pcCavlcCoder, pcSlice);
       m_seiWriter.writeSEImessage(nalu.m_Bitstream, sei_recon_picture_digest, pcSlice->getSPS());
       writeRBSPTrailingBits(nalu.m_Bitstream);
-      
       accessUnit.insert(accessUnit.end(), new NALUnitEBSP(nalu));
     }
+
     if (m_pcCfg->getTemporalLevel0IndexSEIEnabled())
     {
       SEITemporalLevel0Index sei_temporal_level0_index;
