@@ -140,7 +140,7 @@ public:
 
   Void      createWPPCoders(Int iNumSubstreams);
 
-  Void init_TEncSearch(TEncSearch *search);
+  Void init_TEncSearch(TEncSearch *search, TEncEntropy* entropyCoder);
   
   // -------------------------------------------------------------------------------------------------------------------
   // member access functions

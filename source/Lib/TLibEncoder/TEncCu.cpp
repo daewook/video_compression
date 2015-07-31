@@ -279,7 +279,7 @@ Void TEncCu::init( TEncTop* pcEncTop )
 // ====================================================================================================================
 
 Void TEncCu::init_predSearch(TEncSearch *search) {
-  ((TEncTop *)m_pcEncCfg)->init_TEncSearch(search);
+  ((TEncTop *)m_pcEncCfg)->init_TEncSearch(search, m_pcEntropyCoder);
   search->copySearchRange(m_pcPredSearch);
 }
 
